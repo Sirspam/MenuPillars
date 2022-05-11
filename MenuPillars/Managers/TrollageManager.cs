@@ -60,8 +60,6 @@ namespace MenuPillars.Managers
 
 		private void RevertCaramelldansen()
 		{
-			_siraLog.Info("lol");
-			
 			_activeOnPreviousLevel = false;
 			_menuPillarsManager.SetPillarLightBrightness(_pluginConfig.LightsBrightness);
 			_menuPillarsManager.ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
