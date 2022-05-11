@@ -28,17 +28,19 @@ namespace MenuPillars.UI.ViewControllers
 		private SiraLog _siraLog = null!;
 		private PluginConfig _pluginConfig = null!;
 		private PluginMetadata _pluginMetadata = null!;
+		private TrollageManager _trollageManager = null!;
 		private ISiraSyncService _siraSyncService = null!;
 		private MenuPillarsManager _menuPillarsManager = null!;
 		private TimeTweeningManager _timeTweeningManager = null!;
 		private GitHubPageModalController _gitHubPageModalController = null!;
 
 		[Inject]
-		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
+		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, TrollageManager trollageManager, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
 		{
 			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_pluginMetadata = pluginMetadata.Value;
+			_trollageManager = trollageManager;
 			_siraSyncService = siraSyncService;
 			_menuPillarsManager = menuPillarsManager;
 			_timeTweeningManager = timeTweeningManager;
@@ -63,7 +65,7 @@ namespace MenuPillars.UI.ViewControllers
 			set
 			{
 				_pluginConfig.EnableLights = value;
-				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.RainbowLights);
+				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
 				NotifyPropertyChanged();
 			}
 		}
@@ -99,7 +101,7 @@ namespace MenuPillars.UI.ViewControllers
 			set
 			{
 				_pluginConfig.RainbowLights = value;
-				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.EnableLights);
+				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.EnableLights, _pluginConfig.RainbowLoopSpeed);
 				NotifyPropertyChanged();
 			}
 		}
@@ -113,11 +115,34 @@ namespace MenuPillars.UI.ViewControllers
 				_pluginConfig.RainbowLoopSpeed = value;
 				if (_pluginConfig.RainbowLights && _pluginConfig.EnableLights)
 				{
-					_menuPillarsManager.ToggleRainbowColors(true);
+					_menuPillarsManager.ToggleRainbowColors(true, _pluginConfig.RainbowLoopSpeed);
 				}
 			}
 		}
 
+		[UIValue("easter-eggs")]
+		private bool EasterEggs
+		{
+			get => _pluginConfig.EasterEggs;
+			set
+			{
+				if (value != _pluginConfig.EasterEggs)
+				{
+					_pluginConfig.EasterEggs = value;
+				
+					switch (value)
+					{
+						case true:
+							_trollageManager.Initialize();
+							break;
+						case false:
+							_trollageManager.Dispose();
+							break;
+					}
+				}
+			}
+		}
+		
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 

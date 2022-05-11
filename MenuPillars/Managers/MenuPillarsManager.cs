@@ -63,7 +63,7 @@ namespace MenuPillars.Managers
 			_pillarBackRight!.name = "PillarBackRight";
 			_instantiatedPillars = true;
 
-			ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
+			ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
 			SetPillarLightBrightness(_pluginConfig.LightsBrightness);
 		}
 
@@ -99,7 +99,7 @@ namespace MenuPillars.Managers
 			}
 		}
 
-		public void ToggleRainbowColors(bool toggle)
+		public void ToggleRainbowColors(bool toggle, float duration)
 		{
 			_timeTweeningManager.KillAllTweens(this);
 			if (!toggle)
@@ -114,7 +114,7 @@ namespace MenuPillars.Managers
 				return;
 			}
 
-			var tween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f)), _pluginConfig.RainbowLoopSpeed, EaseType.Linear)
+			var tween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f)), duration, EaseType.Linear)
 			{
 				loop = true
 			};

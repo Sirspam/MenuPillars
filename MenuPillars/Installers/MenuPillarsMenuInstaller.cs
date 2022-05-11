@@ -19,14 +19,15 @@ namespace MenuPillars.Installers
 		public override void InstallBindings()
 		{
 			Container.BindInstance(_config);
-			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 			Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
+			Container.BindInterfacesAndSelfTo<TrollageManager>().AsSingle();
+			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 
 			Container.Bind<PillarGrabber>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
-
 			Container.Bind<MenuPillarsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
-			Container.Bind<MenuPillarsSettingsViewController>().FromNewComponentAsViewController().AsSingle();
+
 			Container.Bind<GitHubPageModalController>().AsSingle();
+			Container.Bind<MenuPillarsSettingsViewController>().FromNewComponentAsViewController().AsSingle();
 		}
 	}
 }

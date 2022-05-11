@@ -9,6 +9,7 @@
         <slider-setting text="Lights Brightness" value="lights-brightness" integer-only="false" increment="0.25" min="0.75" max="10" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <checkbox-setting text="Rainbow Colors" value="rainbow-lights" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <slider-setting text="Rainbow Loop Speed" value="rainbow-loop-speed" integer-only="false" increment="0.25" min="1" max="10" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <checkbox-setting text="Easter Eggs" hover-hint="They're funny please I swear" value="easter-eggs" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
     </vertical>
 
     <horizontal anchor-pos-x="30" anchor-pos-y="-35" vertical-fit="PreferredSize" horizontal-fit="PreferredSize">
