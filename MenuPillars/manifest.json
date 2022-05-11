@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "MenuPillars",
+  "name": "MenuPillars",
+  "author": "Sirspam",
+  "version": "0.0.1",
+  "description": "Beat Saber mod that adds back the pillars from the 1.13.2 menu environment",
+  "gameVersion": "1.21.0",
+  "dependsOn": {
+    "BSIPA": "^4.2.2",
+    "BeatSaberMarkupLanguage": "^1.6.3",
+    "SiraUtil": "^3.0.6"
+  },
+  "links": {
+    "project-home": "https://github.com/Sirspam/MenuPillars"
+  }
+}
