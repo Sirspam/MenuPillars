@@ -7,3 +7,4 @@ Beat Saber mod that adds back the pillars from the 1.13.2 menu environment
 * [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) _- Available in ModAssistant_
 ## Contribution
 Feel free to point out any suggestions or improvements by submitting a PR or contacting me on Discord ([Sirspam#7765](https://discordapp.com/users/232574143818760192)).
+![MenuPillars](MenuPillars.jpg)
