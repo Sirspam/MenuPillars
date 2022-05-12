@@ -7,7 +7,6 @@ using MenuPillars.Managers;
 using SiraUtil.Logging;
 using SiraUtil.Web.SiraSync;
 using SiraUtil.Zenject;
-using TMPro;
 using Tweening;
 using UnityEngine;
 using Zenject;

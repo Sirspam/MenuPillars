@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using SiraUtil.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Zenject;
 
 namespace MenuPillars.Utils
 {
@@ -27,7 +23,7 @@ namespace MenuPillars.Utils
 
 		private IEnumerator GetPillars()
 		{
-            bool sceneIsLoaded = false;
+            var sceneIsLoaded = false;
             try
             {
 	            if (TemplatePillarLeft != null || TemplatePillarRight != null)
@@ -35,13 +31,13 @@ namespace MenuPillars.Utils
 		            yield return null;
 	            }
 	            
-	            AsyncOperation loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
+	            var loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
                 while (!loadScene.isDone) yield return null;
 
                 sceneIsLoaded = true;
                 yield return new WaitForSecondsRealtime(0.1f); // Allow objects to fully load
                 
-	                foreach (GameObject gamerObject in Resources.FindObjectsOfTypeAll<GameObject>()) // I love performance
+	                foreach (var gamerObject in Resources.FindObjectsOfTypeAll<GameObject>()) // I love performance
 	                {
 		                switch (gamerObject.name)
 		                {

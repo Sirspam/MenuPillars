@@ -2,7 +2,6 @@
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using MenuPillars.UI.FlowCoordinator;
-using MenuPillars.UI.ViewControllers;
 using Zenject;
 
 namespace MenuPillars.Managers

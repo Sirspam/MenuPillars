@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using IPA;
+﻿using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using SiraUtil.Zenject;
 using MenuPillars.Configuration;
 using MenuPillars.Installers;
+using SiraUtil.Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace MenuPillars
 {
-	[Plugin(RuntimeOptions.DynamicInit), NoEnableDisable]
+	[Plugin(RuntimeOptions.DynamicInit)][NoEnableDisable]
 	public class Plugin
 	{
 		[Init]
