@@ -48,6 +48,8 @@ namespace MenuPillars.Managers
 
 		private void InstantiatePillars()
 		{
+			_pillarGrabber.CompletedEvent -= InstantiatePillars;
+			
 			_menuPillars = new GameObject
 			{
 				name = "MenuPillars"

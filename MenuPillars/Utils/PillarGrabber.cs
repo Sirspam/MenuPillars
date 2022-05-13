@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using SiraUtil.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 namespace MenuPillars.Utils
 {
@@ -9,13 +11,12 @@ namespace MenuPillars.Utils
 	// https://github.com/Exomanz/UITweaks/blob/sira3/UITweaks/Utilities/SettingsPanelObjectGrabber.cs
 	public class PillarGrabber : MonoBehaviour
 	{
-
-		public Action? CompletedEvent;
 		public bool completed;
-
 		public static GameObject? TemplatePillarLeft;
 		public static GameObject? TemplatePillarRight;
-		
+
+		public Action? CompletedEvent;
+
 		public void Start()
 		{
 			StartCoroutine(GetPillars());
@@ -23,43 +24,38 @@ namespace MenuPillars.Utils
 
 		private IEnumerator GetPillars()
 		{
-            var sceneIsLoaded = false;
-            try
-            {
-	            if (TemplatePillarLeft != null || TemplatePillarRight != null)
-	            {
-		            yield return null;
-	            }
-	            
-	            var loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
-                while (!loadScene.isDone) yield return null;
+			var sceneIsLoaded = false;
+			try
+			{
+				if (completed)
+				{
+					yield break;
+				}
 
-                sceneIsLoaded = true;
-                yield return new WaitForSecondsRealtime(0.1f); // Allow objects to fully load
-                
-	                foreach (var gamerObject in Resources.FindObjectsOfTypeAll<GameObject>()) // I love performance
-	                {
-		                switch (gamerObject.name)
-		                {
-			                case "NearBuildingLeft":
-				                TemplatePillarLeft = gamerObject;
-				                break;
-			                case "NearBuildingRight":
-				                TemplatePillarRight = gamerObject;
-				                break;
-		                }
-	                }
-            }
-            finally
-            {
-	            if (sceneIsLoaded)
-	            {
-		            SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
-	            }
+				var loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
+				yield return new WaitUntil(() => loadScene.isDone);
 
-	            completed = true;
-	            CompletedEvent?.Invoke();
-            }
+				sceneIsLoaded = true;
+				yield return new WaitForSecondsRealtime(0.1f); // Allow objects to fully load
+
+				foreach (var gamerObject in Resources.FindObjectsOfTypeAll<BloomFogEnvironment>())
+				{
+					if (gamerObject.name == "Environment")
+					{
+						TemplatePillarLeft = gamerObject.transform.Find("NearBuildingLeft").gameObject;
+						TemplatePillarRight = gamerObject.transform.Find("NearBuildingRight").gameObject;
+						
+						break;
+					}	
+				}
+			}
+			finally
+			{
+				if (sceneIsLoaded) SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
+
+				completed = true;
+				CompletedEvent?.Invoke();
+			}
 		}
 	}
 }
