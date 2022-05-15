@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
-using SiraUtil.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Zenject;
 
 namespace MenuPillars.Utils
 {
@@ -51,7 +49,10 @@ namespace MenuPillars.Utils
 			}
 			finally
 			{
-				if (sceneIsLoaded) SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
+				if (sceneIsLoaded)
+				{
+					SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
+				}
 
 				completed = true;
 				CompletedEvent?.Invoke();
