@@ -38,17 +38,15 @@ namespace MenuPillars.Managers
 
 		private void LevelCollectionViewControllerOndidSelectLevelEvent(LevelCollectionViewController viewController, IPreviewBeatmapLevel previewBeatmapLevel)
 		{
-			_siraLog.Info(_activeOnPreviousLevel);
-			
 			if (_activeOnPreviousLevel)
 			{
 				RevertCaramelldansen();
 				return;
 			}
 			
-			if (_pluginConfig.EasterEggs && previewBeatmapLevel.songName.ToLower().Contains("caramelldansen"))
+			if (_pluginConfig.EasterEggs && (previewBeatmapLevel.songName.ToLower().Contains("caramelldansen") || previewBeatmapLevel.songSubName.ToLower().Contains("caramelldansen")))
 			{
-				_siraLog.Info("O-o-woa-woah, o-o-woa-woah-oh"); // Yea, this should be a pretty clear log as to what's happening
+				_siraLog.Info("o-o-woa-woah-oh"); // Yea, this should be a pretty clear log as to what's happening
 				
 				_activeOnPreviousLevel = true;
 				_menuPillarsManager.SetPillarLightBrightness(15f);
