@@ -1,0 +1,19 @@
+<bg xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+    <vertical>
+        <text id="update-text" active="~update-available" color="#FFEE00"/>
+    </vertical>
+    
+    <vertical horizontal-fit="PreferredSize" vertical-fit="PreferredSize" pad="3" background="round-rect-panel" background-color="#FFFFFFAA">
+        <checkbox-setting text="Enable lights" hover-hint="Disable for the true 1.13.2 experience" value="enable-lights" bind-value="true" apply-on-change="true"/>
+        <color-setting text="Lights Color" value="lights-color" interactable="~enable-lights" on-change="lights-color-changed" bind-value="true" apply-on-change="true"/>
+        <slider-setting id="slider-brightness" text="Lights Brightness" hover-hint="The power of the sun... is in your hands" value="lights-brightness" integer-only="false" increment="0.25" min="0.75" max="10" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <checkbox-setting text="Rainbow Colors" value="rainbow-lights" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <slider-setting text="Rainbow Loop Speed" value="rainbow-loop-speed" integer-only="false" increment="0.25" min="1" max="10" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <checkbox-setting text="Easter Eggs" hover-hint="They're funny please I swear" value="easter-eggs" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <checkbox-setting active="~sun-mode-enable" text="Sun Mode" value="sun-mode" hover-hint="You know where this is going" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+    </vertical>
+
+  <horizontal anchor-pos-x="30" anchor-pos-y="-35" vertical-fit="PreferredSize" horizontal-fit="PreferredSize">
+        <clickable-text id="version-text" text="~version-text-value" on-click="version-text-clicked" align="Right" font-size="4" default-color="orange" highlight-color="yellow"/>
+    </horizontal>
+</bg>
