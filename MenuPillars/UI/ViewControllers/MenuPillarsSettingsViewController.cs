@@ -13,13 +13,19 @@ using Zenject;
 using BeatSaberMarkupLanguage.Components.Settings;
 using IPA.Utilities;
 using UnityEngine.UI;
+using System;
 
 namespace MenuPillars.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\MenuPillarsSettingsView")]
 	[ViewDefinition("MenuPillars.UI.Views.MenuPillarsSettingsView.bsml")]
-	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
+	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController, IDisposable
 	{
+		public void Dispose()
+        {
+			_theFuckingButton.onClick.RemoveListener(LightBrightnessChanged);
+		}
+
 		private bool _updateAvailable;
 		private int _howManyTimesWasItClickedLmao;
 		private Button _theFuckingButton;
@@ -119,38 +125,38 @@ namespace MenuPillars.UI.ViewControllers
 			get => _pluginConfig.LightsBrightness;
 			set
 			{
-				if(value == _sliderBrightness.slider.maxValue)
-                {
-					_howManyTimesWasItClickedLmao =+ 1;
-					if (_howManyTimesWasItClickedLmao == 3)
-                    {
-						_howManyTimesWasItClickedLmao = 0;
-						SunModeEnable = true;
-						_siraLog.Info("it did work :pleadturd:");
-                    }
-                }
-
-
-
 				_pluginConfig.LightsBrightness = value;
 				_menuPillarsManager.SetPillarLightBrightness(value);
 				NotifyPropertyChanged();
 			}
 		}
 
-		[UIAction("light-brightness-changed")]
 		private void LightBrightnessChanged()
         {
 			_siraLog.Info("PLEASE FUCKING WORK");
-        }
+			if (_sliderBrightness.slider.value == _sliderBrightness.slider.maxValue)
+			{
+				_howManyTimesWasItClickedLmao += 1;
+				_siraLog.Info(_howManyTimesWasItClickedLmao);
+				if (_howManyTimesWasItClickedLmao == 3)
+				{
+					_howManyTimesWasItClickedLmao = 0;
+					_pluginConfig.SunModeActive = true;
+					SunModeEnable = true;
+					SunMode = true;
+					_siraLog.Info("it did work :pleadturd:");
+				}
+			}
+		}
 
 		[UIValue("sun-mode-enable")]
 		private bool SunModeEnable
         {
-			get => _pluginConfig.SunMode;
+			get => _pluginConfig.SunModeActive;
             set
             {
 				_pluginConfig.SunMode = value;
+
 				NotifyPropertyChanged();
             }
         }
@@ -210,8 +216,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-
-			_theFuckingButton = _sliderBrightness.GetField<SliderSetting, Button>("incButton");
+			_theFuckingButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_theFuckingButton.onClick.AddListener(LightBrightnessChanged);
 
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
