@@ -67,6 +67,11 @@ namespace MenuPillars.Managers
 
 			ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
 			SetPillarLightBrightness(_pluginConfig.LightsBrightness);
+
+			if (_pluginConfig.SunMode == true) 
+            {
+				SetPillarLightBrightness(500);
+			}
 		}
 
 		private List<TubeBloomPrePassLight> GetLights()
