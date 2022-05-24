@@ -1,4 +1,4 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Loader;
@@ -10,6 +10,9 @@ using SiraUtil.Zenject;
 using Tweening;
 using UnityEngine;
 using Zenject;
+using BeatSaberMarkupLanguage.Components.Settings;
+using IPA.Utilities;
+using UnityEngine.UI;
 
 namespace MenuPillars.UI.ViewControllers
 {
@@ -18,11 +21,15 @@ namespace MenuPillars.UI.ViewControllers
 	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
+		private int _howManyTimesWasItClickedLmao;
+		private Button _theFuckingButton;
 		
 		[UIComponent("update-text")]
 		private readonly CurvedTextMeshPro _updateText = null!;
 		[UIComponent("version-text")] 
 		private readonly CurvedTextMeshPro _versionText = null!;
+		[UIComponent("slider-brightness")]
+		private readonly SliderSetting _sliderBrightness = null!;
 
 		private SiraLog _siraLog = null!;
 		private PluginConfig _pluginConfig = null!;
@@ -68,6 +75,31 @@ namespace MenuPillars.UI.ViewControllers
 				NotifyPropertyChanged();
 			}
 		}
+
+		[UIValue("sun-mode")]
+		private bool SunMode
+        {
+			get => _pluginConfig.SunMode;
+            set
+            {
+				_pluginConfig.SunMode = value;
+				
+				if(value)
+                {
+					_menuPillarsManager.SetPillarLightBrightness(500);
+				}
+				else
+                {
+					_menuPillarsManager.SetPillarLightBrightness(10);
+				}
+
+				NotifyPropertyChanged();
+				
+			}
+
+        }
+
+		
 		
 		[UIValue("lights-color")]
 		private Color LightsColor
@@ -87,11 +119,41 @@ namespace MenuPillars.UI.ViewControllers
 			get => _pluginConfig.LightsBrightness;
 			set
 			{
+				if(value == _sliderBrightness.slider.maxValue)
+                {
+					_howManyTimesWasItClickedLmao =+ 1;
+					if (_howManyTimesWasItClickedLmao == 3)
+                    {
+						_howManyTimesWasItClickedLmao = 0;
+						SunModeEnable = true;
+						_siraLog.Info("it did work :pleadturd:");
+                    }
+                }
+
+
+
 				_pluginConfig.LightsBrightness = value;
 				_menuPillarsManager.SetPillarLightBrightness(value);
 				NotifyPropertyChanged();
 			}
 		}
+
+		[UIAction("light-brightness-changed")]
+		private void LightBrightnessChanged()
+        {
+			_siraLog.Info("PLEASE FUCKING WORK");
+        }
+
+		[UIValue("sun-mode-enable")]
+		private bool SunModeEnable
+        {
+			get => _pluginConfig.SunMode;
+            set
+            {
+				_pluginConfig.SunMode = value;
+				NotifyPropertyChanged();
+            }
+        }
 
 		[UIValue("rainbow-lights")]
 		private bool RainbowLights
@@ -148,6 +210,10 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
+
+			_theFuckingButton = _sliderBrightness.GetField<SliderSetting, Button>("incButton");
+
+			
 			var gitVersion = await _siraSyncService.LatestVersion();
 			if (gitVersion != null && gitVersion > _pluginMetadata.HVersion)
 			{
@@ -158,7 +224,7 @@ namespace MenuPillars.UI.ViewControllers
 				_timeTweeningManager.AddTween(new FloatTween(0f, 1f, val => _updateText.alpha = val, 0.4f, EaseType.InCubic), this);
 			}
 		}
-		
+
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
