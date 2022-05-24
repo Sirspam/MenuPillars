@@ -14,6 +14,8 @@ namespace MenuPillars.Configuration
 		public virtual bool RainbowLights { get; set; } = false;
 		public virtual float RainbowLoopSpeed { get; set; } = 5f;
 		public virtual bool EasterEggs { get; set; } = true;
+		public virtual bool SunModeActive { get; set; } = false;
 		public virtual bool SunMode { get; set; } = false;
+		
 	}
 }
