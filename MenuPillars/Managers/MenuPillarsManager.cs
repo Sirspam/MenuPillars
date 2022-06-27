@@ -54,6 +54,7 @@ namespace MenuPillars.Managers
 			{
 				name = "MenuPillars"
 			};
+			_menuPillars.transform.SetParent(GameObject.Find("DefaultMenuEnvironment").transform);
 
 			_pillarFrontLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
 			_pillarFrontLeft!.name = "PillarFrontLeft";
