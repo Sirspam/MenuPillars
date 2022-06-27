@@ -60,7 +60,7 @@ namespace MenuPillars.Managers
 		{
 			_activeOnPreviousLevel = false;
 			_menuPillarsManager.SetPillarLightBrightness(_pluginConfig.LightsBrightness);
-			_menuPillarsManager.ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
+			_menuPillarsManager.ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
 			
 			_levelCollectionViewController.didDeactivateEvent -= LevelCollectionViewControllerOndidDeactivateEvent;
 		}

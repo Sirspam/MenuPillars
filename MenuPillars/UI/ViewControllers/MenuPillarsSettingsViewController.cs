@@ -64,7 +64,7 @@ namespace MenuPillars.UI.ViewControllers
 			set
 			{
 				_pluginConfig.EnableLights = value;
-				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.RainbowLights, _pluginConfig.RainbowLoopSpeed);
+				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.RainbowLights);
 				NotifyPropertyChanged();
 			}
 		}
@@ -76,7 +76,6 @@ namespace MenuPillars.UI.ViewControllers
 			set
 			{
 				_pluginConfig.PillarLightsColor = value;
-				// _menuPillarsManager.ToggleRainbowColors(false);
 				NotifyPropertyChanged();
 			}
 		}
@@ -100,7 +99,7 @@ namespace MenuPillars.UI.ViewControllers
 			set
 			{
 				_pluginConfig.RainbowLights = value;
-				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.EnableLights, _pluginConfig.RainbowLoopSpeed);
+				_menuPillarsManager.ToggleRainbowColors(value && _pluginConfig.EnableLights);
 				NotifyPropertyChanged();
 			}
 		}
@@ -114,7 +113,7 @@ namespace MenuPillars.UI.ViewControllers
 				_pluginConfig.RainbowLoopSpeed = value;
 				if (_pluginConfig.RainbowLights && _pluginConfig.EnableLights)
 				{
-					_menuPillarsManager.ToggleRainbowColors(true, _pluginConfig.RainbowLoopSpeed);
+					_menuPillarsManager.ToggleRainbowColors(true);
 				}
 			}
 		}
