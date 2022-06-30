@@ -1,4 +1,4 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Loader;
@@ -10,6 +10,10 @@ using SiraUtil.Zenject;
 using Tweening;
 using UnityEngine;
 using Zenject;
+using BeatSaberMarkupLanguage.Components.Settings;
+using IPA.Utilities;
+using UnityEngine.UI;
+using System;
 
 namespace MenuPillars.UI.ViewControllers
 {
@@ -18,11 +22,15 @@ namespace MenuPillars.UI.ViewControllers
 	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
-		
+		private Button? _brightnessSliderIncButton;
+		private int _brightnessSliderIncButtonPressedCount;
+
 		[UIComponent("update-text")]
 		private readonly CurvedTextMeshPro _updateText = null!;
 		[UIComponent("version-text")] 
 		private readonly CurvedTextMeshPro _versionText = null!;
+		[UIComponent("slider-brightness")]
+		private readonly SliderSetting _sliderBrightness = null!;
 
 		private SiraLog _siraLog = null!;
 		private PluginConfig _pluginConfig = null!;
@@ -92,6 +100,20 @@ namespace MenuPillars.UI.ViewControllers
 			}
 		}
 
+		[UIValue("brightness-cap-raised")]
+		private bool BrightnessCapRaised
+		{
+			get => _pluginConfig.BrightnessCapRaised;
+			set
+			{
+				_pluginConfig.BrightnessCapRaised = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		[UIValue("brightness-cap")]
+		private int BrightnessCap => !BrightnessCapRaised ? 10 : 250;
+		
 		[UIValue("rainbow-lights")]
 		private bool RainbowLights
 		{
@@ -140,13 +162,17 @@ namespace MenuPillars.UI.ViewControllers
 				}
 			}
 		}
-		
+
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
+			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
+
+			
 			var gitVersion = await _siraSyncService.LatestVersion();
 			if (gitVersion != null && gitVersion > _pluginMetadata.HVersion)
 			{
@@ -157,7 +183,7 @@ namespace MenuPillars.UI.ViewControllers
 				_timeTweeningManager.AddTween(new FloatTween(0f, 1f, val => _updateText.alpha = val, 0.4f, EaseType.InCubic), this);
 			}
 		}
-		
+
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
@@ -167,6 +193,12 @@ namespace MenuPillars.UI.ViewControllers
 			}
 			
 			_menuPillarsManager.SetPillarLightColors(value);
+		}
+
+		[UIAction("lower-brightness-cap-clicked")]
+		private void LowerBrightnessCapClicked()
+		{
+			ChangeBrightnessCap(false);
 		}
 		
 		[UIAction("version-text-clicked")]
@@ -179,6 +211,45 @@ namespace MenuPillars.UI.ViewControllers
 			
 			_gitHubPageModalController.ShowModal(_versionText.transform, _pluginMetadata.Name,
 				_pluginMetadata.PluginHomeLink!.ToString());
+		}
+
+		private void LightBrightnessChanged()
+		{
+			if (!BrightnessCapRaised && _sliderBrightness.slider.value.Equals(_sliderBrightness.slider.maxValue))
+			{
+				_brightnessSliderIncButtonPressedCount += 1;
+				if (_brightnessSliderIncButtonPressedCount == 3)
+				{
+					_brightnessSliderIncButtonPressedCount = 0;
+					ChangeBrightnessCap(true);
+				}
+			}
+		}
+
+		private void ChangeBrightnessCap(bool toggle)
+		{
+			switch (toggle)
+			{
+				case true:
+				{
+					BrightnessCapRaised = true;
+					_sliderBrightness.slider.maxValue = BrightnessCap;
+					_sliderBrightness.slider.value = 10;
+					break;
+				}
+				case false:
+				{
+					BrightnessCapRaised = false;
+					_sliderBrightness.slider.maxValue = BrightnessCap;
+					LightsBrightness = BrightnessCap;
+					break;
+				}
+			}
+		}
+		
+		public void Dispose()
+		{
+			_brightnessSliderIncButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
 	}
 }
