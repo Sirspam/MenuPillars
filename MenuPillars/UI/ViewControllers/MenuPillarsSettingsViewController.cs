@@ -19,17 +19,12 @@ namespace MenuPillars.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\MenuPillarsSettingsView")]
 	[ViewDefinition("MenuPillars.UI.Views.MenuPillarsSettingsView.bsml")]
-	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController, IDisposable
+	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
-		public void Dispose()
-        {
-			_theFuckingButton.onClick.RemoveListener(LightBrightnessChanged);
-		}
-
 		private bool _updateAvailable;
+		private Button? _theFuckingButton;
 		private int _howManyTimesWasItClickedLmao;
-		private Button _theFuckingButton;
-		
+
 		[UIComponent("update-text")]
 		private readonly CurvedTextMeshPro _updateText = null!;
 		[UIComponent("version-text")] 
@@ -81,31 +76,6 @@ namespace MenuPillars.UI.ViewControllers
 				NotifyPropertyChanged();
 			}
 		}
-
-		[UIValue("sun-mode")]
-		private bool SunMode
-        {
-			get => _pluginConfig.SunMode;
-            set
-            {
-				_pluginConfig.SunMode = value;
-				
-				if(value)
-                {
-					_menuPillarsManager.SetPillarLightBrightness(500);
-				}
-				else
-                {
-					_menuPillarsManager.SetPillarLightBrightness(10);
-				}
-
-				NotifyPropertyChanged();
-				
-			}
-
-        }
-
-		
 		
 		[UIValue("lights-color")]
 		private Color LightsColor
@@ -131,36 +101,20 @@ namespace MenuPillars.UI.ViewControllers
 			}
 		}
 
-		private void LightBrightnessChanged()
-        {
-			_siraLog.Info("PLEASE FUCKING WORK");
-			if (_sliderBrightness.slider.value == _sliderBrightness.slider.maxValue)
+		[UIValue("brightness-cap-raised")]
+		private bool BrightnessCapRaised
+		{
+			get => _pluginConfig.BrightnessCapRaised;
+			set
 			{
-				_howManyTimesWasItClickedLmao += 1;
-				_siraLog.Info(_howManyTimesWasItClickedLmao);
-				if (_howManyTimesWasItClickedLmao == 3)
-				{
-					_howManyTimesWasItClickedLmao = 0;
-					_pluginConfig.SunModeActive = true;
-					SunModeEnable = true;
-					SunMode = true;
-					_siraLog.Info("it did work :pleadturd:");
-				}
+				_pluginConfig.BrightnessCapRaised = value;
+				NotifyPropertyChanged();
 			}
 		}
 
-		[UIValue("sun-mode-enable")]
-		private bool SunModeEnable
-        {
-			get => _pluginConfig.SunModeActive;
-            set
-            {
-				_pluginConfig.SunMode = value;
-
-				NotifyPropertyChanged();
-            }
-        }
-
+		[UIValue("brightness-cap")]
+		private int BrightnessCap => !BrightnessCapRaised ? 10 : 250;
+		
 		[UIValue("rainbow-lights")]
 		private bool RainbowLights
 		{
@@ -209,7 +163,7 @@ namespace MenuPillars.UI.ViewControllers
 				}
 			}
 		}
-		
+
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
@@ -241,6 +195,12 @@ namespace MenuPillars.UI.ViewControllers
 			
 			_menuPillarsManager.SetPillarLightColors(value);
 		}
+
+		[UIAction("lower-brightness-cap-clicked")]
+		private void LowerBrightnessCapClicked()
+		{
+			ChangeBrightnessCap(false);
+		}
 		
 		[UIAction("version-text-clicked")]
 		private void VersionTextClicked()
@@ -252,6 +212,45 @@ namespace MenuPillars.UI.ViewControllers
 			
 			_gitHubPageModalController.ShowModal(_versionText.transform, _pluginMetadata.Name,
 				_pluginMetadata.PluginHomeLink!.ToString());
+		}
+
+		private void LightBrightnessChanged()
+		{
+			if (!BrightnessCapRaised && _sliderBrightness.slider.value.Equals(_sliderBrightness.slider.maxValue))
+			{
+				_howManyTimesWasItClickedLmao += 1;
+				if (_howManyTimesWasItClickedLmao == 3)
+				{
+					_howManyTimesWasItClickedLmao = 0;
+					ChangeBrightnessCap(true);
+				}
+			}
+		}
+
+		private void ChangeBrightnessCap(bool toggle)
+		{
+			switch (toggle)
+			{
+				case true:
+				{
+					BrightnessCapRaised = true;
+					_sliderBrightness.slider.maxValue = BrightnessCap;
+					_sliderBrightness.slider.value = 10;
+					break;
+				}
+				case false:
+				{
+					BrightnessCapRaised = false;
+					_sliderBrightness.slider.maxValue = BrightnessCap;
+					LightsBrightness = BrightnessCap;
+					break;
+				}
+			}
+		}
+		
+		public void Dispose()
+		{
+			_theFuckingButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
 	}
 }
