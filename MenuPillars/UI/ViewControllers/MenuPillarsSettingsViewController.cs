@@ -22,8 +22,8 @@ namespace MenuPillars.UI.ViewControllers
 	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
-		private Button? _theFuckingButton;
-		private int _howManyTimesWasItClickedLmao;
+		private Button? _brightnessSliderIncButton;
+		private int _brightnessSliderIncButtonPressedCount;
 
 		[UIComponent("update-text")]
 		private readonly CurvedTextMeshPro _updateText = null!;
@@ -170,8 +170,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-			_theFuckingButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
-			_theFuckingButton.onClick.AddListener(LightBrightnessChanged);
+			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
 
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
@@ -218,10 +218,10 @@ namespace MenuPillars.UI.ViewControllers
 		{
 			if (!BrightnessCapRaised && _sliderBrightness.slider.value.Equals(_sliderBrightness.slider.maxValue))
 			{
-				_howManyTimesWasItClickedLmao += 1;
-				if (_howManyTimesWasItClickedLmao == 3)
+				_brightnessSliderIncButtonPressedCount += 1;
+				if (_brightnessSliderIncButtonPressedCount == 3)
 				{
-					_howManyTimesWasItClickedLmao = 0;
+					_brightnessSliderIncButtonPressedCount = 0;
 					ChangeBrightnessCap(true);
 				}
 			}
@@ -250,7 +250,7 @@ namespace MenuPillars.UI.ViewControllers
 		
 		public void Dispose()
 		{
-			_theFuckingButton!.onClick.RemoveListener(LightBrightnessChanged);
+			_brightnessSliderIncButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
 	}
 }
