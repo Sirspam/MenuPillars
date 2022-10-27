@@ -212,6 +212,11 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
+			if (_pluginConfig.PillarLightsColor == value)
+			{
+				return;
+			}
+			
 			if (RainbowLights)
 			{
 				RainbowLights = false;
