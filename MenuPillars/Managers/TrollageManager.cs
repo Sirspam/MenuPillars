@@ -5,7 +5,7 @@ using Zenject;
 
 namespace MenuPillars.Managers
 {
-	internal class TrollageManager : IInitializable, IDisposable
+	internal sealed class TrollageManager : IInitializable, IDisposable
 	{
 		private bool _activeOnPreviousLevel;
 		

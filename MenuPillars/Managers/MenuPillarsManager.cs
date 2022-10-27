@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace MenuPillars.Managers
 {
-	internal class MenuPillarsManager : IInitializable, IDisposable
+	internal sealed class MenuPillarsManager : IInitializable, IDisposable
 	{
 		private bool _instantiatedPillars;
 		private GameObject? _menuPillars;
@@ -18,6 +18,8 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackLeft;
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
+
+		public Color CurrentColor { get; private set; }
 
 		private readonly PluginConfig _pluginConfig;
 		private readonly PillarGrabber _pillarGrabber;
@@ -64,6 +66,7 @@ namespace MenuPillars.Managers
 			_pillarBackLeft!.name = "PillarBackLeft";
 			_pillarBackRight = Object.Instantiate(PillarGrabber.TemplatePillarRight, new Vector3(20f, 12f, -40f), Quaternion.Euler(new Vector3(45f, 90f)), _menuPillars.transform);
 			_pillarBackRight!.name = "PillarBackRight";
+			CurrentColor = _pluginConfig.PillarLightsColor;
 			_instantiatedPillars = true;
 
 			ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
@@ -77,7 +80,7 @@ namespace MenuPillars.Managers
 				InstantiatePillars();
 			}
 			
-			if (_pillarLights == null)
+			if (_pillarLights is null)
 			{
 				_pillarLights = new List<TubeBloomPrePassLight>();
 				_pillarLights.AddRange(_menuPillars!.GetComponentsInChildren<TubeBloomPrePassLight>());
@@ -88,14 +91,38 @@ namespace MenuPillars.Managers
 		
 		public void SetPillarLightColors(Color color)
 		{
+			if (!_instantiatedPillars)
+			{
+				return;
+			}
+			
+			CurrentColor = color;
 			foreach (var light in GetLights())
 			{
 				light.color = color;
 			}
 		}
 
+		public void TweenToPillarLightColor(Color newColor)
+		{
+			_timeTweeningManager.KillAllTweens(this);
+			var tween = new ColorTween(CurrentColor, newColor, SetPillarLightColors, 0.6f, EaseType.Linear);
+			_timeTweeningManager.AddTween(tween, this);
+		}
+
+		public void TweenPillarColorAlpha(float newAlpha)
+		{
+			var tween = new FloatTween(CurrentColor.a, newAlpha, val => SetPillarLightColors(CurrentColor.ColorWithAlpha(val)), 0.6f, EaseType.Linear);
+			_timeTweeningManager.AddTween(tween, this);
+		}
+		
 		public void SetPillarLightBrightness(float brightness)
 		{
+			if (!_instantiatedPillars)
+			{
+				return;
+			}
+			
 			foreach (var light in GetLights())
 			{
 				light.bloomFogIntensityMultiplier = brightness;
@@ -122,7 +149,7 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			var tween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f)), duration, EaseType.Linear)
+			var tween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a)), duration, EaseType.Linear)
 			{
 				loop = true
 			};

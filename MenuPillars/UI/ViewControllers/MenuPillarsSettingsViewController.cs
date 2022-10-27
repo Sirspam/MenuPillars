@@ -13,15 +13,15 @@ using Zenject;
 using BeatSaberMarkupLanguage.Components.Settings;
 using IPA.Utilities;
 using UnityEngine.UI;
-using System;
 
 namespace MenuPillars.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\MenuPillarsSettingsView")]
 	[ViewDefinition("MenuPillars.UI.Views.MenuPillarsSettingsView.bsml")]
-	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
+	internal sealed class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
+		private bool _softRestartRequired;
 		private Button? _brightnessSliderIncButton;
 		private int _brightnessSliderIncButtonPressedCount;
 
@@ -113,6 +113,20 @@ namespace MenuPillars.UI.ViewControllers
 
 		[UIValue("brightness-cap")]
 		private int BrightnessCap => !BrightnessCapRaised ? 10 : 250;
+
+		[UIValue("visualize-audio")]
+		private bool VisualizeAudio
+		{
+			get => _pluginConfig.VisualizeAudio;
+			set
+			{
+				if (_pluginConfig.VisualizeAudio != value)
+				{
+					_pluginConfig.VisualizeAudio = value;
+					SoftRestartRequired = !SoftRestartRequired;	
+				}
+			}
+		}
 		
 		[UIValue("rainbow-lights")]
 		private bool RainbowLights
@@ -163,6 +177,17 @@ namespace MenuPillars.UI.ViewControllers
 			}
 		}
 
+		[UIValue("soft-restart-required")]
+		internal bool SoftRestartRequired
+		{
+			get => _softRestartRequired;
+			private set
+			{
+				_softRestartRequired = value;
+				NotifyPropertyChanged();
+			}
+		}
+
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
@@ -174,7 +199,7 @@ namespace MenuPillars.UI.ViewControllers
 
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
-			if (gitVersion != null && gitVersion > _pluginMetadata.HVersion)
+			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
 			{
 				_siraLog.Info($"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!");
 				_updateText.text = $"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!";
@@ -204,7 +229,7 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("version-text-clicked")]
 		private void VersionTextClicked()
 		{
-			if (_pluginMetadata.PluginHomeLink == null)
+			if (_pluginMetadata.PluginHomeLink is null)
 			{
 				return;
 			}

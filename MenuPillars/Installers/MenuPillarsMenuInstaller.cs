@@ -1,3 +1,4 @@
+using MenuPillars.AffinityPatches;
 using MenuPillars.Configuration;
 using MenuPillars.Managers;
 using MenuPillars.UI.FlowCoordinator;
@@ -7,7 +8,7 @@ using Zenject;
 
 namespace MenuPillars.Installers
 {
-	internal class MenuPillarsMenuInstaller : Installer
+	internal sealed class MenuPillarsMenuInstaller : Installer
 	{
 		private readonly PluginConfig _config;
 
@@ -19,7 +20,14 @@ namespace MenuPillars.Installers
 		public override void InstallBindings()
 		{
 			Container.BindInstance(_config);
+
+			Container.BindInterfacesAndSelfTo<SongPreviewPlayerPatch>().AsSingle();
+			
 			Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
+			if (_config.VisualizeAudio)
+			{
+				Container.BindInterfacesTo<AudioVisualizerManager>().AsSingle();	
+			}
 			Container.BindInterfacesAndSelfTo<TrollageManager>().AsSingle();
 			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 

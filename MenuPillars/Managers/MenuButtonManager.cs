@@ -6,7 +6,7 @@ using Zenject;
 
 namespace MenuPillars.Managers
 {
-	internal class MenuButtonManager : IInitializable, IDisposable
+	internal sealed class MenuButtonManager : IInitializable, IDisposable
 	{
 		private readonly MenuButton _menuButton;
 		private readonly MainFlowCoordinator _mainFlowCoordinator;
@@ -27,7 +27,9 @@ namespace MenuPillars.Managers
 		public void Dispose()
 		{
 			if (MenuButtons.IsSingletonAvailable)
+			{
 				MenuButtons.instance.UnregisterButton(_menuButton);
+			}
 		}
 
 		private void MenuButtonClicked()

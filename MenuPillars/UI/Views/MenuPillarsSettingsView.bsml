@@ -8,9 +8,11 @@
         <color-setting text="Lights Color" value="lights-color" interactable="~enable-lights" on-change="lights-color-changed" bind-value="true" apply-on-change="true"/>
         <slider-setting id="slider-brightness" text="Lights Brightness" value="lights-brightness" integer-only="false" increment="0.25" min="0.50" max="~brightness-cap" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <button active="~brightness-cap-raised" text="Reset Brightness Cap" on-click="lower-brightness-cap-clicked" min-width="40" pref-height="7"/>
+        <checkbox-setting text="Visualize Audio" value="visualize-audio" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <checkbox-setting text="Rainbow Colors" value="rainbow-lights" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <slider-setting text="Rainbow Loop Speed" value="rainbow-loop-speed" integer-only="false" increment="0.25" min="1" max="15" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <checkbox-setting text="Easter Eggs" hover-hint="They're funny please I swear" value="easter-eggs" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <text text="A soft restart is required to set these settings" color="red" active="~soft-restart-required" align="Center" font-size="5" all-uppercase="true"/>
     </vertical>
 
   <horizontal anchor-pos-x="30" anchor-pos-y="-35" vertical-fit="PreferredSize" horizontal-fit="PreferredSize">
