@@ -114,6 +114,13 @@ namespace MenuPillars.UI.ViewControllers
 		[UIValue("brightness-cap")]
 		private int BrightnessCap => !BrightnessCapRaised ? 10 : 250;
 
+		[UIValue("use-cover-color")]
+		private bool UseCoverColor
+		{
+			get => _pluginConfig.UseCoverColor;
+			set => _pluginConfig.UseCoverColor = value;
+		}
+
 		[UIValue("visualize-audio")]
 		private bool VisualizeAudio
 		{

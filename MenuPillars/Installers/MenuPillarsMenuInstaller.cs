@@ -24,10 +24,13 @@ namespace MenuPillars.Installers
 			Container.BindInterfacesAndSelfTo<SongPreviewPlayerPatch>().AsSingle();
 			
 			Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
+			
 			if (_config.VisualizeAudio)
 			{
 				Container.BindInterfacesTo<AudioVisualizerManager>().AsSingle();	
 			}
+
+			Container.BindInterfacesTo<CoverColorManager>().AsSingle();
 			Container.BindInterfacesAndSelfTo<TrollageManager>().AsSingle();
 			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 

@@ -12,7 +12,9 @@ namespace MenuPillars.Managers
 	internal sealed class MenuPillarsManager : IInitializable, IDisposable
 	{
 		private bool _instantiatedPillars;
+		private FloatTween? _alphaTween;
 		private GameObject? _menuPillars;
+		private FloatTween? _rainbowTween;
 		private GameObject? _pillarFrontLeft;
 		private GameObject? _pillarFrontRight;
 		private GameObject? _pillarBackLeft;
@@ -96,6 +98,8 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
+			_alphaTween?.Kill();
+			
 			CurrentColor = color;
 			foreach (var light in GetLights())
 			{
@@ -103,17 +107,45 @@ namespace MenuPillars.Managers
 			}
 		}
 
-		public void TweenToPillarLightColor(Color newColor)
+		public void TweenToUserColors()
+		{
+			if (_pluginConfig.RainbowLights && _rainbowTween is not null && _rainbowTween.isActive)
+			{
+				_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.2f, EaseType.Linear), this);
+				return;
+			}
+			
+			_timeTweeningManager.KillAllTweens(this);
+			if (_pluginConfig.RainbowLights)
+			{
+				TweenToPillarLightColor(Color.red, () => ToggleRainbowColors(true));
+			}
+			else
+			{
+				TweenToPillarLightColor(_pluginConfig.PillarLightsColor);	
+			}
+		}
+
+		public void TweenToPillarLightColor(Color newColor, Action? callback = null)
 		{
 			_timeTweeningManager.KillAllTweens(this);
 			var tween = new ColorTween(CurrentColor, newColor, SetPillarLightColors, 0.6f, EaseType.Linear);
+			if (callback is not null)
+			{
+				tween.onCompleted = callback.Invoke;
+			}
 			_timeTweeningManager.AddTween(tween, this);
 		}
 
 		public void TweenPillarColorAlpha(float newAlpha)
 		{
-			var tween = new FloatTween(CurrentColor.a, newAlpha, val => SetPillarLightColors(CurrentColor.ColorWithAlpha(val)), 0.6f, EaseType.Linear);
-			_timeTweeningManager.AddTween(tween, this);
+			_alphaTween?.Kill();
+			_alphaTween = new FloatTween(CurrentColor.a, newAlpha, val => SetPillarLightColors(CurrentColor.ColorWithAlpha(val)), 0.6f, EaseType.Linear)
+			{
+				onCompleted = () => _alphaTween = null,
+				onKilled = () => _alphaTween = null
+			};
+			_timeTweeningManager.AddTween(_alphaTween, this);
 		}
 		
 		public void SetPillarLightBrightness(float brightness)
@@ -136,9 +168,9 @@ namespace MenuPillars.Managers
 		
 		public void ToggleRainbowColors(bool toggle, float duration)
 		{
-			_timeTweeningManager.KillAllTweens(this);
 			if (!toggle)
 			{
+				_timeTweeningManager.KillAllTweens(this);
 				if (!_pluginConfig.EnableLights)
 				{
 					SetPillarLightColors(Color.clear);
@@ -148,12 +180,18 @@ namespace MenuPillars.Managers
 				SetPillarLightColors(_pluginConfig.PillarLightsColor);
 				return;
 			}
-			
-			var tween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a)), duration, EaseType.Linear)
+
+			if (_rainbowTween is not null && _rainbowTween.isActive)
 			{
-				loop = true
+				return;
+			}
+			
+			_rainbowTween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a)), duration, EaseType.Linear)
+			{
+				loop = true,
+				onKilled = () => _rainbowTween = null
 			};
-			_timeTweeningManager.AddTween(tween, this);
+			_timeTweeningManager.AddTween(_rainbowTween, this);
 		}
 	}
 }
