@@ -25,7 +25,7 @@ namespace MenuPillars.Managers
 
 		private async Task GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
 		{
-			if (!_pluginConfig.UseCoverColor)
+			if (!_pluginConfig.UseCoverColor && !_pluginConfig.EnableLights)
 			{
 				return;
 			}
@@ -72,7 +72,7 @@ namespace MenuPillars.Managers
 			// This is already handled by the audio visualizer manager
 			// This logic really should be handled in the tween to user colors method but I am unfortunately lazy
 			// It shall be future me's problem :)
-			if (!_pluginConfig.VisualizeAudio)
+			if (!_pluginConfig.VisualizeAudio && _pluginConfig.EnableLights)
 			{
 				_menuPillarsManager.TweenToUserColors();	
 			}

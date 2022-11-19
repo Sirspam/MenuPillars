@@ -25,7 +25,7 @@ namespace MenuPillars.Installers
 			
 			Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
 			
-			if (_config.VisualizeAudio)
+			if (_config.VisualizeAudio && _config.EnableLights)
 			{
 				Container.BindInterfacesTo<AudioVisualizerManager>().AsSingle();	
 			}
