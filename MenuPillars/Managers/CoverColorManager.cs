@@ -54,19 +54,11 @@ namespace MenuPillars.Managers
 				g += pixel.g;
 				b += pixel.b;
 			}
-
-			if (_pluginConfig.VisualizeAudio)
-			{
-				_menuPillarsManager.SetPillarLightColors(new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length, _menuPillarsManager.CurrentColor.a));
-			}
-			else
-			{
-				_menuPillarsManager.TweenToPillarLightColor(new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length));	
-			}
 			
 			var averageColour = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
 			Color.RGBToHSV(averageColour, out var h, out var s, out _);
 			averageColour = Color.HSVToRGB(h, s, 1f);
+			_menuPillarsManager.TweenToPillarLightColor(averageColour.ColorWithAlpha(_menuPillarsManager.CurrentColor.a));
 		}
 		
 		private void LevelCollectionViewControllerOnDidDeactivateEvent(bool removedfromhierarchy, bool screensystemdisabling)

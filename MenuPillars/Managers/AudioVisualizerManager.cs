@@ -1,6 +1,7 @@
 ﻿using System;
 using MenuPillars.AffinityPatches;
 using MenuPillars.Configuration;
+using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
@@ -14,15 +15,17 @@ namespace MenuPillars.Managers
 		private float _peakAmplitude;
 		
 		private readonly PluginConfig _pluginConfig;
+		private readonly SiraLog _siraLog;
 		private readonly MenuPillarsManager _menuPillarsManager;
 
-		public AudioVisualizerManager(PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager)
+		public AudioVisualizerManager(PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, SiraLog siraLog)
 		{
 			_pluginConfig = pluginConfig;
 			_menuPillarsManager = menuPillarsManager;
+			_siraLog = siraLog;
 		}
 
-		// Unfortunately I am stupid so this solution is kinda trash :(
+		// Unfortunately I am stupid so this looks trash :(
 		public void Tick()
 		{
 			if (_currentAudioSource is null)
@@ -41,27 +44,20 @@ namespace MenuPillars.Managers
 			}
 			
 			amplitude /= SampleNumber;
-
+			
 			if (amplitude > _peakAmplitude)
 			{
 				_peakAmplitude = amplitude;
 			}
 			
-			_menuPillarsManager.SetPillarLightColors(_menuPillarsManager.CurrentColor.ColorWithAlpha(Mathf.InverseLerp(0f, _peakAmplitude, amplitude)));
+			_menuPillarsManager.CurrentColor = _menuPillarsManager.CurrentColor.ColorWithAlpha(Mathf.InverseLerp(0f, _peakAmplitude, amplitude));
 		}
 
 		private void SongPreviewPlayerPatchOnDefaultAudioSourceStarted(AudioSource audioSource)
-		{ 
+		{
 			if (_currentAudioSource is not null)
 			{
-				if (_pluginConfig.RainbowLights)
-				{
-					_menuPillarsManager.TweenPillarColorAlpha(1f);
-				}
-				else
-				{
-					_menuPillarsManager.TweenToPillarLightColor(_pluginConfig.PillarLightsColor);	
-				}
+				_menuPillarsManager.TweenToUserColors();
 			}
 			
 			_currentAudioSource = null;
@@ -70,7 +66,7 @@ namespace MenuPillars.Managers
 		private void SongPreviewPlayerPatchOnSongPreviewAudioSourceStarted(AudioSource audioSource)
 		{
 			_currentAudioSource = audioSource;
-			_peakAmplitude = 0.06f;
+			_peakAmplitude = 0.08f;
 		}
 
 		public void Initialize()

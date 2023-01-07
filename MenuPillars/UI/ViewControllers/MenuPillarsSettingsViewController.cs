@@ -228,8 +228,8 @@ namespace MenuPillars.UI.ViewControllers
 			{
 				RainbowLights = false;
 			}
-			
-			_menuPillarsManager.SetPillarLightColors(value);
+
+			_menuPillarsManager.CurrentColor = value;
 		}
 
 		[UIAction("lower-brightness-cap-clicked")]

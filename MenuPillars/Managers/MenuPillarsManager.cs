@@ -9,10 +9,11 @@ using Object = UnityEngine.Object;
 
 namespace MenuPillars.Managers
 {
-	internal sealed class MenuPillarsManager : IInitializable, IDisposable
+	internal sealed class MenuPillarsManager : IInitializable, ILateTickable, IDisposable
 	{
+		private Color _currentColor;
+		private bool _needColourUpdate;
 		private bool _instantiatedPillars;
-		private FloatTween? _alphaTween;
 		private GameObject? _menuPillars;
 		private FloatTween? _rainbowTween;
 		private GameObject? _pillarFrontLeft;
@@ -21,7 +22,16 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
 
-		public Color CurrentColor { get; private set; }
+		public Color CurrentColor
+		{
+			get => _currentColor;
+			set
+			{
+				_currentColor = value;
+				_needColourUpdate = true;
+			}
+			
+		}
 
 		private readonly PluginConfig _pluginConfig;
 		private readonly PillarGrabber _pillarGrabber;
@@ -45,10 +55,20 @@ namespace MenuPillars.Managers
 			_pillarGrabber.CompletedEvent += InstantiatePillars;
 		}
 
-		public void Dispose()
+		public void LateTick()
 		{
-			_pillarGrabber.CompletedEvent -= InstantiatePillars;
+			if (_needColourUpdate && _instantiatedPillars)
+			{
+				foreach (var light in GetLights())
+				{
+					light.color = CurrentColor;
+				}
+
+				_needColourUpdate = false;	
+			}
 		}
+		
+		public void Dispose() => _pillarGrabber.CompletedEvent -= InstantiatePillars;
 
 		private void InstantiatePillars()
 		{
@@ -90,22 +110,6 @@ namespace MenuPillars.Managers
 
 			return _pillarLights;
 		}
-		
-		public void SetPillarLightColors(Color color)
-		{
-			if (!_instantiatedPillars)
-			{
-				return;
-			}
-			
-			_alphaTween?.Kill();
-			
-			CurrentColor = color;
-			foreach (var light in GetLights())
-			{
-				light.color = color;
-			}
-		}
 
 		public void TweenToUserColors()
 		{
@@ -129,7 +133,7 @@ namespace MenuPillars.Managers
 		public void TweenToPillarLightColor(Color newColor, Action? callback = null)
 		{
 			_timeTweeningManager.KillAllTweens(this);
-			var tween = new ColorTween(CurrentColor, newColor, SetPillarLightColors, 0.6f, EaseType.Linear);
+			var tween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.6f, EaseType.Linear);
 			if (callback is not null)
 			{
 				tween.onCompleted = callback.Invoke;
@@ -137,17 +141,6 @@ namespace MenuPillars.Managers
 			_timeTweeningManager.AddTween(tween, this);
 		}
 
-		public void TweenPillarColorAlpha(float newAlpha)
-		{
-			_alphaTween?.Kill();
-			_alphaTween = new FloatTween(CurrentColor.a, newAlpha, val => SetPillarLightColors(CurrentColor.ColorWithAlpha(val)), 0.6f, EaseType.Linear)
-			{
-				onCompleted = () => _alphaTween = null,
-				onKilled = () => _alphaTween = null
-			};
-			_timeTweeningManager.AddTween(_alphaTween, this);
-		}
-		
 		public void SetPillarLightBrightness(float brightness)
 		{
 			if (!_instantiatedPillars)
@@ -161,11 +154,8 @@ namespace MenuPillars.Managers
 			}
 		}
 
-		public void ToggleRainbowColors(bool toggle)
-		{
-			ToggleRainbowColors(toggle, _pluginConfig.RainbowLoopSpeed);
-		}
-		
+		public void ToggleRainbowColors(bool toggle) => ToggleRainbowColors(toggle, _pluginConfig.RainbowLoopSpeed);
+
 		public void ToggleRainbowColors(bool toggle, float duration)
 		{
 			if (!toggle)
@@ -173,11 +163,11 @@ namespace MenuPillars.Managers
 				_timeTweeningManager.KillAllTweens(this);
 				if (!_pluginConfig.EnableLights)
 				{
-					SetPillarLightColors(Color.clear);
+					CurrentColor = Color.clear;
 					return;
 				}
 				
-				SetPillarLightColors(_pluginConfig.PillarLightsColor);
+				CurrentColor = _pluginConfig.PillarLightsColor;
 				return;
 			}
 
@@ -186,7 +176,7 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			_rainbowTween = new FloatTween(0f, 1f, val => SetPillarLightColors(Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a)), duration, EaseType.Linear)
+			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
 			{
 				loop = true,
 				onKilled = () => _rainbowTween = null
