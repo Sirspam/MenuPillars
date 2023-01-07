@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MenuPillars.Configuration;
-using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
@@ -10,17 +10,15 @@ namespace MenuPillars.Managers
 {
 	internal sealed class CoverColorManager : IInitializable, IDisposable
 	{
-		private readonly SiraLog _siraLog;
 		private readonly PluginConfig _pluginConfig;
 		private readonly MenuPillarsManager _menuPillarsManager;
 		private readonly LevelCollectionViewController _levelCollectionViewController;
 
-		public CoverColorManager(PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController, SiraLog siraLog)
+		public CoverColorManager(PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
 		{
 			_pluginConfig = pluginConfig;
 			_menuPillarsManager = menuPillarsManager;
 			_levelCollectionViewController = levelCollectionViewController;
-			_siraLog = siraLog;
 		}
 
 		private async Task GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
@@ -42,10 +40,10 @@ namespace MenuPillars.Managers
 			catch
 			{
 				// Sprite texture not readable on base game maps
-				// Had some attempts with wacky shenanigans to get the pixels but it always came out as white 
+				// Had some attempts with wacky shenanigans to get the pixels but nothing worked :(
 				return;
 			}
-			
+
 			var r = 0f;
 			var g = 0f;
 			var b = 0f;
@@ -65,6 +63,10 @@ namespace MenuPillars.Managers
 			{
 				_menuPillarsManager.TweenToPillarLightColor(new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length));	
 			}
+			
+			var averageColour = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
+			Color.RGBToHSV(averageColour, out var h, out var s, out _);
+			averageColour = Color.HSVToRGB(h, s, 1f);
 		}
 		
 		private void LevelCollectionViewControllerOnDidDeactivateEvent(bool removedfromhierarchy, bool screensystemdisabling)
