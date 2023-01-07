@@ -8,14 +8,12 @@ namespace MenuPillars.UI.FlowCoordinator
 	internal sealed class MenuPillarsFlowCoordinator : HMUI.FlowCoordinator
 	{
 		private MainFlowCoordinator _mainFlowCoordinator = null!;
-		private MenuTransitionsHelper _menuTransitionsHelper = null!;
 		private MenuPillarsSettingsViewController _menuPillarsSettingsViewController = null!;
 
 		[Inject]
-		private void Construct(MainFlowCoordinator mainFlowCoordinator, MenuTransitionsHelper menuTransitionsHelper, MenuPillarsSettingsViewController menuPillarsSettingsViewController)
+		private void Construct(MainFlowCoordinator mainFlowCoordinator, MenuPillarsSettingsViewController menuPillarsSettingsViewController)
 		{
 			_mainFlowCoordinator = mainFlowCoordinator;
-			_menuTransitionsHelper = menuTransitionsHelper;
 			_menuPillarsSettingsViewController = menuPillarsSettingsViewController;
 		}
 		
@@ -27,15 +25,6 @@ namespace MenuPillars.UI.FlowCoordinator
 			ProvideInitialViewControllers(_menuPillarsSettingsViewController);
 		}
 		
-		protected override void BackButtonWasPressed(ViewController topViewController)
-		{
-			if (_menuPillarsSettingsViewController.SoftRestartRequired)
-			{
-				_menuTransitionsHelper.RestartGame();
-				return;
-			}
-			
-			_mainFlowCoordinator.DismissFlowCoordinator(this);
-		}
+		protected override void BackButtonWasPressed(ViewController topViewController) => _mainFlowCoordinator.DismissFlowCoordinator(this);
 	}
 }

@@ -21,7 +21,6 @@ namespace MenuPillars.UI.ViewControllers
 	internal sealed class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
-		private bool _softRestartRequired;
 		private Button? _brightnessSliderIncButton;
 		private int _brightnessSliderIncButtonPressedCount;
 
@@ -125,14 +124,7 @@ namespace MenuPillars.UI.ViewControllers
 		private bool VisualizeAudio
 		{
 			get => _pluginConfig.VisualizeAudio;
-			set
-			{
-				if (_pluginConfig.VisualizeAudio != value)
-				{
-					_pluginConfig.VisualizeAudio = value;
-					SoftRestartRequired = !SoftRestartRequired;	
-				}
-			}
+			set => _pluginConfig.VisualizeAudio = value;
 		}
 		
 		[UIValue("rainbow-lights")]
@@ -183,18 +175,7 @@ namespace MenuPillars.UI.ViewControllers
 				}
 			}
 		}
-
-		[UIValue("soft-restart-required")]
-		internal bool SoftRestartRequired
-		{
-			get => _softRestartRequired;
-			private set
-			{
-				_softRestartRequired = value;
-				NotifyPropertyChanged();
-			}
-		}
-
+		
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MenuPillars.Configuration;
@@ -23,16 +22,9 @@ namespace MenuPillars.Managers
 
 		private async Task GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
 		{
-			if (!_pluginConfig.UseCoverColor && !_pluginConfig.EnableLights)
-			{
-				return;
-			}
-			
 			var sprite = await previewBeatmapLevel.GetCoverImageAsync(CancellationToken.None);
 
 			Color[] pixels;
-			
-			
 			try
 			{
 				pixels = sprite.texture.GetPixels();
@@ -63,17 +55,21 @@ namespace MenuPillars.Managers
 		
 		private void LevelCollectionViewControllerOnDidDeactivateEvent(bool removedfromhierarchy, bool screensystemdisabling)
 		{
-			// This is already handled by the audio visualizer manager
-			// This logic really should be handled in the tween to user colors method but I am unfortunately lazy
-			// It shall be future me's problem :)
-			if (!_pluginConfig.VisualizeAudio && _pluginConfig.EnableLights)
+			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor)
 			{
-				_menuPillarsManager.TweenToUserColors();	
+				return;
 			}
+			
+			_menuPillarsManager.TweenToUserColors();
 		}
 
 		private void LevelCollectionViewControllerOnDidSelectLevelEvent(LevelCollectionViewController viewController, IPreviewBeatmapLevel previewBeatmapLevel)
 		{
+			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor)
+			{
+				return;
+			}
+			
 			Task.Run(() => GetAverageCoverColorAsync(previewBeatmapLevel));
 		}
 

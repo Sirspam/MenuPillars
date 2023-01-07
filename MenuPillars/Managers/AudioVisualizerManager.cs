@@ -28,7 +28,7 @@ namespace MenuPillars.Managers
 		// Unfortunately I am stupid so this looks trash :(
 		public void Tick()
 		{
-			if (_currentAudioSource is null)
+			if (!_pluginConfig.VisualizeAudio || !_pluginConfig.EnableLights || _currentAudioSource is null)
 			{
 				return;
 			}
@@ -55,6 +55,11 @@ namespace MenuPillars.Managers
 
 		private void SongPreviewPlayerPatchOnDefaultAudioSourceStarted(AudioSource audioSource)
 		{
+			if (!_pluginConfig.EnableLights || !_pluginConfig.VisualizeAudio)
+			{
+				return;
+			}
+			
 			if (_currentAudioSource is not null)
 			{
 				_menuPillarsManager.TweenToUserColors();
@@ -65,6 +70,11 @@ namespace MenuPillars.Managers
 
 		private void SongPreviewPlayerPatchOnSongPreviewAudioSourceStarted(AudioSource audioSource)
 		{
+			if (!_pluginConfig.EnableLights || !_pluginConfig.VisualizeAudio)
+			{
+				return;
+			}
+			
 			_currentAudioSource = audioSource;
 			_peakAmplitude = 0.08f;
 		}

@@ -14,6 +14,7 @@ namespace MenuPillars.Managers
 		private Color _currentColor;
 		private bool _needColourUpdate;
 		private bool _instantiatedPillars;
+		private ColorTween? _colourTween;
 		private GameObject? _menuPillars;
 		private FloatTween? _rainbowTween;
 		private GameObject? _pillarFrontLeft;
@@ -113,13 +114,17 @@ namespace MenuPillars.Managers
 
 		public void TweenToUserColors()
 		{
-			if (_pluginConfig.RainbowLights && _rainbowTween is not null && _rainbowTween.isActive)
+			if (_colourTween is not null && _colourTween.isActive)
+			{
+				return;
+			}
+			
+			if (_rainbowTween is not null && _rainbowTween.isActive)
 			{
 				_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.2f, EaseType.Linear), this);
 				return;
 			}
 			
-			_timeTweeningManager.KillAllTweens(this);
 			if (_pluginConfig.RainbowLights)
 			{
 				TweenToPillarLightColor(Color.red, () => ToggleRainbowColors(true));
@@ -132,13 +137,13 @@ namespace MenuPillars.Managers
 
 		public void TweenToPillarLightColor(Color newColor, Action? callback = null)
 		{
-			_timeTweeningManager.KillAllTweens(this);
-			var tween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.6f, EaseType.Linear);
+			_colourTween?.Kill();
+			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.6f, EaseType.Linear);
 			if (callback is not null)
 			{
-				tween.onCompleted = callback.Invoke;
+				_colourTween.onCompleted = callback.Invoke;
 			}
-			_timeTweeningManager.AddTween(tween, this);
+			_timeTweeningManager.AddTween(_colourTween, this);
 		}
 
 		public void SetPillarLightBrightness(float brightness)
