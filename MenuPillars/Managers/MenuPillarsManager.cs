@@ -138,7 +138,7 @@ namespace MenuPillars.Managers
 		public void TweenToPillarLightColor(Color newColor, Action? callback = null)
 		{
 			_colourTween?.Kill();
-			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.6f, EaseType.Linear);
+			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.5f, EaseType.Linear);
 			if (callback is not null)
 			{
 				_colourTween.onCompleted = callback.Invoke;

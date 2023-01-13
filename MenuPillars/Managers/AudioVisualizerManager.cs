@@ -76,7 +76,7 @@ namespace MenuPillars.Managers
 			}
 			
 			_currentAudioSource = audioSource;
-			_peakAmplitude = 0.08f;
+			_peakAmplitude = 0.065f;
 		}
 
 		public void Initialize()
