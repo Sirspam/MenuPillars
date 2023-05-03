@@ -1,0 +1,8 @@
+<bg xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+    <vertical horizontal-fit="PreferredSize" vertical-fit="PreferredSize" pad="3" pref-width="95" background="round-rect-panel" background-color="#FFFFFFAA">
+        <text text="Uh oh, looks like something has gone wrong!" font-size="6.2" align="Center"/>
+        <text text="Try restarting Beat Saber." align="Center"/>
+        <text text="If the issue persists, ask for help in BSMG or open a GitHub issue." align="Center"/>
+        <img src="MenuPillars.Resources.cat-explode.gif" preserve-aspect="true"/>
+    </vertical>
+</bg>

@@ -35,6 +35,7 @@ namespace MenuPillars.Installers
 
 			Container.Bind<GitHubPageModalController>().AsSingle();
 			Container.Bind<MenuPillarsSettingsViewController>().FromNewComponentAsViewController().AsSingle();
+			Container.Bind<MenuPillarErrorViewController>().FromNewComponentAsViewController().AsSingle();
 		}
 	}
 }
