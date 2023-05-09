@@ -5,7 +5,7 @@ using Zenject;
 
 namespace MenuPillars.Managers
 {
-	internal sealed class TrollageManager : IInitializable, IDisposable
+	internal sealed class TomfooleryManager : IInitializable, IDisposable
 	{
 		private bool _activeOnPreviousLevel;
 		
@@ -14,7 +14,7 @@ namespace MenuPillars.Managers
 		private readonly MenuPillarsManager _menuPillarsManager;
 		private readonly LevelCollectionViewController _levelCollectionViewController;
 
-		public TrollageManager(SiraLog siraLog, PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
+		public TomfooleryManager(SiraLog siraLog, PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
 		{
 			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
@@ -43,8 +43,9 @@ namespace MenuPillars.Managers
 				_siraLog.Info("o-o-woa-woah-oh"); // Yea, this should be a pretty clear log as to what's happening
 				
 				_activeOnPreviousLevel = true;
-				_menuPillarsManager.SetPillarLightBrightness(12f);
-				_menuPillarsManager.ToggleRainbowColors(true, 0.8f);
+				_menuPillarsManager.SetPillarLightBrightness(15f);
+				_menuPillarsManager.ToggleRainbowColors(true, 0.75f);
+				_menuPillarsManager.TogglePillarDance(true);
 				
 				_levelCollectionViewController.didDeactivateEvent += LevelCollectionViewControllerOndidDeactivateEvent;
 				return;
@@ -61,6 +62,7 @@ namespace MenuPillars.Managers
 			_activeOnPreviousLevel = false;
 			_menuPillarsManager.SetPillarLightBrightness(_pluginConfig.LightsBrightness);
 			_menuPillarsManager.ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
+			_menuPillarsManager.TogglePillarDance(false);
 			
 			_levelCollectionViewController.didDeactivateEvent -= LevelCollectionViewControllerOndidDeactivateEvent;
 		}

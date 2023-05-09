@@ -13,10 +13,11 @@ namespace MenuPillars.Managers
 	{
 		private Color _currentColor;
 		private bool _needColourUpdate;
-		private bool _instantiatedPillars;
+		private FloatTween? _danceTween;
 		private ColorTween? _colourTween;
 		private GameObject? _menuPillars;
 		private FloatTween? _rainbowTween;
+		private bool _instantiatedPillars;
 		private GameObject? _pillarFrontLeft;
 		private GameObject? _pillarFrontRight;
 		private GameObject? _pillarBackLeft;
@@ -163,9 +164,15 @@ namespace MenuPillars.Managers
 
 		public void ToggleRainbowColors(bool toggle, float duration)
 		{
+			if (!_instantiatedPillars)
+			{
+				return;
+			}
+			
+			_rainbowTween?.Kill();
+			
 			if (!toggle)
 			{
-				_timeTweeningManager.KillAllTweens(this);
 				if (!_pluginConfig.EnableLights)
 				{
 					CurrentColor = Color.clear;
@@ -175,18 +182,46 @@ namespace MenuPillars.Managers
 				CurrentColor = _pluginConfig.PillarLightsColor;
 				return;
 			}
+			
+			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
+			{
+				loop = true
+			};
+			_timeTweeningManager.AddTween(_rainbowTween, this);
+		}
 
-			if (_rainbowTween is not null && _rainbowTween.isActive)
+		public void TogglePillarDance(bool value)
+		{
+			if (!_instantiatedPillars)
 			{
 				return;
 			}
 			
-			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
+			if (value)
 			{
-				loop = true,
-				onKilled = () => _rainbowTween = null
-			};
-			_timeTweeningManager.AddTween(_rainbowTween, this);
+				void SetPillarRotation(float xRot)
+				{
+					_pillarFrontLeft!.transform.rotation = Quaternion.Euler(new Vector3(xRot, 0f));
+					_pillarFrontRight!.transform.rotation = Quaternion.Euler(new Vector3(xRot, 0f));
+					_pillarBackLeft!.transform.rotation = Quaternion.Euler(new Vector3(xRot, 270f));
+					_pillarBackRight!.transform.rotation = Quaternion.Euler(new Vector3(xRot, 90f));
+				}
+				
+				_danceTween?.Kill();
+				_danceTween = new FloatTween(0f, 2f, val => SetPillarRotation(Mathf.Lerp(-45, 45, Mathf.PingPong(val, 1))), 0.7f, EaseType.Linear)
+				{
+					loop = true,
+				};
+				_timeTweeningManager.AddTween(_danceTween, this);	
+			}
+			else
+			{
+				_danceTween?.Kill();
+				_pillarFrontLeft!.transform.rotation = Quaternion.Euler(new Vector3(45f, 0f));
+				_pillarFrontRight!.transform.rotation = Quaternion.Euler(new Vector3(45f, 0f));
+				_pillarBackLeft!.transform.rotation = Quaternion.Euler(new Vector3(45f, 270f));
+				_pillarBackRight!.transform.rotation = Quaternion.Euler(new Vector3(45f, 90f));
+			}
 		}
 	}
 }

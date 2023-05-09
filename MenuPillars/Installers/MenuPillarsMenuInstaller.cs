@@ -27,7 +27,7 @@ namespace MenuPillars.Installers
 			
 			Container.BindInterfacesTo<AudioVisualizerManager>().AsSingle();
 			Container.BindInterfacesTo<CoverColorManager>().AsSingle();
-			Container.BindInterfacesAndSelfTo<TrollageManager>().AsSingle();
+			Container.BindInterfacesAndSelfTo<TomfooleryManager>().AsSingle();
 			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 
 			Container.Bind<PillarGrabber>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
