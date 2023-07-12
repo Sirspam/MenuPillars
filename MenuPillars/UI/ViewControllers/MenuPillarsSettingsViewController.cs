@@ -183,9 +183,7 @@ namespace MenuPillars.UI.ViewControllers
 		private async void PostParse()
 		{
 			_brightnessSliderIncButton = _sliderBrightness.incButton;
-			
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
-
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
 			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
