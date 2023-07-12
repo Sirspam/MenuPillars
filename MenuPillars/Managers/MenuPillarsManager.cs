@@ -210,7 +210,7 @@ namespace MenuPillars.Managers
 				_danceTween?.Kill();
 				_danceTween = new FloatTween(0f, 2f, val => SetPillarRotation(Mathf.Lerp(-45, 45, Mathf.PingPong(val, 1))), 0.7f, EaseType.Linear)
 				{
-					loop = true,
+					loop = true
 				};
 				_timeTweeningManager.AddTween(_danceTween, this);	
 			}

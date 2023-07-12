@@ -11,7 +11,7 @@ namespace MenuPillars.Managers
 	{
 		private const int SampleNumber = 1024;
 
-		private AudioSource? _currentAudioSource = null;
+		private AudioSource? _currentAudioSource;
 		private float _peakAmplitude;
 		
 		private readonly PluginConfig _pluginConfig;
@@ -33,7 +33,7 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			float[] samples = new float[SampleNumber];
+			var samples = new float[SampleNumber];
 			
 			_currentAudioSource.GetOutputData(samples, 0);
 

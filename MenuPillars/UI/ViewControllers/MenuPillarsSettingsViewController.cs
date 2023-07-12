@@ -1,7 +1,9 @@
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Loader;
+using IPA.Utilities;
 using MenuPillars.Configuration;
 using MenuPillars.Managers;
 using SiraUtil.Logging;
@@ -9,10 +11,8 @@ using SiraUtil.Web.SiraSync;
 using SiraUtil.Zenject;
 using Tweening;
 using UnityEngine;
-using Zenject;
-using BeatSaberMarkupLanguage.Components.Settings;
-using IPA.Utilities;
 using UnityEngine.UI;
+using Zenject;
 
 namespace MenuPillars.UI.ViewControllers
 {
