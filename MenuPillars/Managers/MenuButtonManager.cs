@@ -19,22 +19,10 @@ namespace MenuPillars.Managers
 			_menuPillarsFlowCoordinator = menuPillarsSettingsViewController;
 		}
 
-		public void Initialize()
-		{
-			MenuButtons.instance.RegisterButton(_menuButton);
-		}
+		public void Initialize() => MenuButtons.instance.RegisterButton(_menuButton);
 
-		public void Dispose()
-		{
-			if (MenuButtons.IsSingletonAvailable)
-			{
-				MenuButtons.instance.UnregisterButton(_menuButton);
-			}
-		}
+		public void Dispose() => MenuButtons.instance.UnregisterButton(_menuButton);
 
-		private void MenuButtonClicked()
-		{
-			_mainFlowCoordinator.PresentFlowCoordinator(_menuPillarsFlowCoordinator);
-		}
+		private void MenuButtonClicked() => _mainFlowCoordinator.PresentFlowCoordinator(_menuPillarsFlowCoordinator);
 	}
 }
