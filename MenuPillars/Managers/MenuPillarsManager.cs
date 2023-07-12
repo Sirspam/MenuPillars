@@ -128,7 +128,7 @@ namespace MenuPillars.Managers
 			
 			if (_pluginConfig.RainbowLights)
 			{
-				TweenToPillarLightColor(Color.red, () => ToggleRainbowColors(true));
+				TweenToPillarLightColor(Color.red, callback: () => ToggleRainbowColors(true));
 			}
 			else
 			{
@@ -136,10 +136,10 @@ namespace MenuPillars.Managers
 			}
 		}
 
-		public void TweenToPillarLightColor(Color newColor, Action? callback = null)
+		public void TweenToPillarLightColor(Color newColor, float duration = 0.5f,  Action? callback = null)
 		{
 			_colourTween?.Kill();
-			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, 0.5f, EaseType.Linear);
+			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, duration, EaseType.Linear);
 			if (callback is not null)
 			{
 				_colourTween.onCompleted = callback.Invoke;

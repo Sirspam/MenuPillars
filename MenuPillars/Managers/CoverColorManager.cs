@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using IPA.Utilities.Async;
 using MenuPillars.Configuration;
 using UnityEngine;
 using Zenject;
@@ -24,16 +26,24 @@ namespace MenuPillars.Managers
 		{
 			var sprite = await previewBeatmapLevel.GetCoverImageAsync(CancellationToken.None);
 
-			Color[] pixels;
+			Color[] pixels = {};
 			try
 			{
 				pixels = sprite.texture.GetPixels();
 			}
-			catch
+			catch (Exception)
 			{
-				// Sprite texture not readable on base game maps
-				// Had some attempts with wacky shenanigans to get the pixels but nothing worked :(
-				return;
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				{
+					if (previewBeatmapLevel is not CustomPreviewBeatmapLevel)
+					{
+						pixels = GetUnreadableTexture(sprite.texture, InvertImageAtlas(sprite.textureRect)).GetPixels();
+					}
+					else
+					{
+						pixels = GetUnreadableTexture(sprite.texture, sprite.textureRect).GetPixels();
+					}
+				});
 			}
 
 			var r = 0f;
@@ -46,11 +56,32 @@ namespace MenuPillars.Managers
 				g += pixel.g;
 				b += pixel.b;
 			}
-			
+
 			var averageColour = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
 			Color.RGBToHSV(averageColour, out var h, out var s, out _);
 			averageColour = Color.HSVToRGB(h, s, 1f);
-			_menuPillarsManager.TweenToPillarLightColor(averageColour.ColorWithAlpha(_menuPillarsManager.CurrentColor.a));
+			_menuPillarsManager.TweenToPillarLightColor(averageColour.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
+		}
+
+		private Rect InvertImageAtlas(Rect rect)
+		{
+			rect.y = 2048 - rect.y - 160;
+			return rect;
+		}
+		
+		private Texture2D GetUnreadableTexture(Texture2D texture, Rect rect)
+		{
+			var tempRenderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+			Graphics.Blit(texture, tempRenderTexture);
+			var previous = RenderTexture.active;
+			RenderTexture.active = tempRenderTexture;
+			var readableTexture = new Texture2D((int)rect.width, (int)rect.height);
+			readableTexture.ReadPixels(rect, 0, 0);
+			readableTexture.Apply();
+			RenderTexture.active = previous;
+			RenderTexture.ReleaseTemporary(tempRenderTexture);
+
+			return readableTexture;
 		}
 		
 		private void LevelCollectionViewControllerOnDidDeactivateEvent(bool removedfromhierarchy, bool screensystemdisabling)
