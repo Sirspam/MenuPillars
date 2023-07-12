@@ -182,7 +182,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_brightnessSliderIncButton = _sliderBrightness.incButton;
+			
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
 
 			
