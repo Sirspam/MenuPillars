@@ -184,7 +184,6 @@ namespace MenuPillars.UI.ViewControllers
 		{
 			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
-
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
 			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
