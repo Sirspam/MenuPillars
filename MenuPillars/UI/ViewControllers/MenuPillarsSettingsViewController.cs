@@ -34,19 +34,17 @@ namespace MenuPillars.UI.ViewControllers
 		private SiraLog _siraLog = null!;
 		private PluginConfig _pluginConfig = null!;
 		private PluginMetadata _pluginMetadata = null!;
-		private TomfooleryManager _tomfooleryManager = null!;
 		private ISiraSyncService _siraSyncService = null!;
 		private MenuPillarsManager _menuPillarsManager = null!;
 		private TimeTweeningManager _timeTweeningManager = null!;
 		private GitHubPageModalController _gitHubPageModalController = null!;
 
 		[Inject]
-		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, TomfooleryManager tomfooleryManager, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
+		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
 		{
 			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_pluginMetadata = pluginMetadata.Value;
-			_tomfooleryManager = tomfooleryManager;
 			_siraSyncService = siraSyncService;
 			_menuPillarsManager = menuPillarsManager;
 			_timeTweeningManager = timeTweeningManager;
@@ -149,29 +147,6 @@ namespace MenuPillars.UI.ViewControllers
 				if (_pluginConfig.RainbowLights && _pluginConfig.EnableLights)
 				{
 					_menuPillarsManager.ToggleRainbowColors(true);
-				}
-			}
-		}
-
-		[UIValue("easter-eggs")]
-		private bool EasterEggs
-		{
-			get => _pluginConfig.EasterEggs;
-			set
-			{
-				if (value != _pluginConfig.EasterEggs)
-				{
-					_pluginConfig.EasterEggs = value;
-				
-					switch (value)
-					{
-						case true:
-							_tomfooleryManager.Initialize();
-							break;
-						case false:
-							_tomfooleryManager.Dispose();
-							break;
-					}
 				}
 			}
 		}
