@@ -22,26 +22,26 @@ namespace MenuPillars.Utils
 
 		private IEnumerator GetPillars()
 		{
+			if (completed)
+			{
+				yield break;
+			}
+			
 			var sceneIsLoaded = false;
 			try
 			{
-				if (completed)
-				{
-					yield break;
-				}
-
 				var loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
 				yield return new WaitUntil(() => loadScene.isDone);
 
 				sceneIsLoaded = true;
-				yield return new WaitForSecondsRealtime(0.1f); // Allow objects to fully load
-
-				foreach (var gamerObject in Resources.FindObjectsOfTypeAll<BloomFogEnvironment>())
+				GameObject[] gameObjects = { };
+				yield return new WaitUntil(() => (gameObjects = SceneManager.GetSceneByName("BigMirrorEnvironment").GetRootGameObjects()) != null);
+				foreach (var go in gameObjects)
 				{
-					if (gamerObject.name == "Environment")
+					if (go.name == "Environment")
 					{
-						TemplatePillarLeft = gamerObject.transform.Find("NearBuildingLeft").gameObject;
-						TemplatePillarRight = gamerObject.transform.Find("NearBuildingRight").gameObject;
+						TemplatePillarLeft = go.transform.Find("NearBuildingLeft").gameObject;
+						TemplatePillarRight = go.transform.Find("NearBuildingRight").gameObject;
 						
 						break;
 					}	
@@ -54,8 +54,11 @@ namespace MenuPillars.Utils
 					SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
 				}
 
-				completed = true;
-				CompletedEvent?.Invoke();
+				if (TemplatePillarLeft != null && TemplatePillarRight != null)
+				{
+					completed = true;
+					CompletedEvent?.Invoke();	
+				}
 			}
 		}
 	}

@@ -1,7 +1,9 @@
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Loader;
+using IPA.Utilities;
 using MenuPillars.Configuration;
 using MenuPillars.Managers;
 using SiraUtil.Logging;
@@ -9,17 +11,14 @@ using SiraUtil.Web.SiraSync;
 using SiraUtil.Zenject;
 using Tweening;
 using UnityEngine;
-using Zenject;
-using BeatSaberMarkupLanguage.Components.Settings;
-using IPA.Utilities;
 using UnityEngine.UI;
-using System;
+using Zenject;
 
 namespace MenuPillars.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\MenuPillarsSettingsView")]
 	[ViewDefinition("MenuPillars.UI.Views.MenuPillarsSettingsView.bsml")]
-	internal class MenuPillarsSettingsViewController : BSMLAutomaticViewController
+	internal sealed class MenuPillarsSettingsViewController : BSMLAutomaticViewController
 	{
 		private bool _updateAvailable;
 		private Button? _brightnessSliderIncButton;
@@ -35,19 +34,17 @@ namespace MenuPillars.UI.ViewControllers
 		private SiraLog _siraLog = null!;
 		private PluginConfig _pluginConfig = null!;
 		private PluginMetadata _pluginMetadata = null!;
-		private TrollageManager _trollageManager = null!;
 		private ISiraSyncService _siraSyncService = null!;
 		private MenuPillarsManager _menuPillarsManager = null!;
 		private TimeTweeningManager _timeTweeningManager = null!;
 		private GitHubPageModalController _gitHubPageModalController = null!;
 
 		[Inject]
-		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, TrollageManager trollageManager, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
+		private void Construct(SiraLog siraLog, PluginConfig pluginConfig, UBinder<Plugin, PluginMetadata> pluginMetadata, ISiraSyncService siraSyncService, MenuPillarsManager menuPillarsManager, TimeTweeningManager timeTweeningManager, GitHubPageModalController gitHubPageModalController)
 		{
 			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_pluginMetadata = pluginMetadata.Value;
-			_trollageManager = trollageManager;
 			_siraSyncService = siraSyncService;
 			_menuPillarsManager = menuPillarsManager;
 			_timeTweeningManager = timeTweeningManager;
@@ -113,6 +110,20 @@ namespace MenuPillars.UI.ViewControllers
 
 		[UIValue("brightness-cap")]
 		private int BrightnessCap => !BrightnessCapRaised ? 10 : 250;
+
+		[UIValue("use-cover-color")]
+		private bool UseCoverColor
+		{
+			get => _pluginConfig.UseCoverColor;
+			set => _pluginConfig.UseCoverColor = value;
+		}
+
+		[UIValue("visualize-audio")]
+		private bool VisualizeAudio
+		{
+			get => _pluginConfig.VisualizeAudio;
+			set => _pluginConfig.VisualizeAudio = value;
+		}
 		
 		[UIValue("rainbow-lights")]
 		private bool RainbowLights
@@ -139,42 +150,18 @@ namespace MenuPillars.UI.ViewControllers
 				}
 			}
 		}
-
-		[UIValue("easter-eggs")]
-		private bool EasterEggs
-		{
-			get => _pluginConfig.EasterEggs;
-			set
-			{
-				if (value != _pluginConfig.EasterEggs)
-				{
-					_pluginConfig.EasterEggs = value;
-				
-					switch (value)
-					{
-						case true:
-							_trollageManager.Initialize();
-							break;
-						case false:
-							_trollageManager.Dispose();
-							break;
-					}
-				}
-			}
-		}
-
+		
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_brightnessSliderIncButton = _sliderBrightness.incButton;
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
-
 			
 			var gitVersion = await _siraSyncService.LatestVersion();
-			if (gitVersion != null && gitVersion > _pluginMetadata.HVersion)
+			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
 			{
 				_siraLog.Info($"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!");
 				_updateText.text = $"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!";
@@ -187,12 +174,17 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
+			if (_pluginConfig.PillarLightsColor == value)
+			{
+				return;
+			}
+			
 			if (RainbowLights)
 			{
 				RainbowLights = false;
 			}
-			
-			_menuPillarsManager.SetPillarLightColors(value);
+
+			_menuPillarsManager.CurrentColor = value;
 		}
 
 		[UIAction("lower-brightness-cap-clicked")]
@@ -204,7 +196,7 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("version-text-clicked")]
 		private void VersionTextClicked()
 		{
-			if (_pluginMetadata.PluginHomeLink == null)
+			if (_pluginMetadata.PluginHomeLink is null)
 			{
 				return;
 			}

@@ -1,5 +1,5 @@
 # MenuPillars
-Beat Saber mod that brings back the pillars from the 1.13.2 menu environment and adds customisable lights to them.
+A Beat Saber mod that brings back the pillars from the 1.13.2 menu environment and adds customisable lights to them.
 ## Usage
 MenuPillars' setting can be accessed from BSML's mods panel, to the left before selecting a game mode. These settings allow for the lights on the pillars to be customised.
 ## Installation

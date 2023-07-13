@@ -1,3 +1,4 @@
+using MenuPillars.AffinityPatches;
 using MenuPillars.Configuration;
 using MenuPillars.Managers;
 using MenuPillars.UI.FlowCoordinator;
@@ -7,7 +8,7 @@ using Zenject;
 
 namespace MenuPillars.Installers
 {
-	internal class MenuPillarsMenuInstaller : Installer
+	internal sealed class MenuPillarsMenuInstaller : Installer
 	{
 		private readonly PluginConfig _config;
 
@@ -19,8 +20,13 @@ namespace MenuPillars.Installers
 		public override void InstallBindings()
 		{
 			Container.BindInstance(_config);
+
+			Container.BindInterfacesAndSelfTo<SongPreviewPlayerPatch>().AsSingle();
+			
 			Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
-			Container.BindInterfacesAndSelfTo<TrollageManager>().AsSingle();
+			
+			Container.BindInterfacesTo<AudioVisualizerManager>().AsSingle();
+			Container.BindInterfacesTo<CoverColorManager>().AsSingle();
 			Container.BindInterfacesAndSelfTo<MenuPillarsManager>().AsSingle();
 
 			Container.Bind<PillarGrabber>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
@@ -28,6 +34,7 @@ namespace MenuPillars.Installers
 
 			Container.Bind<GitHubPageModalController>().AsSingle();
 			Container.Bind<MenuPillarsSettingsViewController>().FromNewComponentAsViewController().AsSingle();
+			Container.Bind<MenuPillarErrorViewController>().FromNewComponentAsViewController().AsSingle();
 		}
 	}
 }

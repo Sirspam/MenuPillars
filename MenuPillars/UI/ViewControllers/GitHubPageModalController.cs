@@ -9,7 +9,7 @@ using Component = UnityEngine.Component;
 
 namespace MenuPillars.UI.ViewControllers
 {
-	internal class GitHubPageModalController : INotifyPropertyChanged
+	internal sealed class GitHubPageModalController : INotifyPropertyChanged
 	{
 		private bool _parsed;
 		private string _modalText = null!;

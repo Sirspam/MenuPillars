@@ -1,19 +1,24 @@
 ﻿using BeatSaberMarkupLanguage;
 using HMUI;
 using MenuPillars.UI.ViewControllers;
+using MenuPillars.Utils;
 using Zenject;
 
 namespace MenuPillars.UI.FlowCoordinator
 {
-	internal class MenuPillarsFlowCoordinator : HMUI.FlowCoordinator
+	internal sealed class MenuPillarsFlowCoordinator : HMUI.FlowCoordinator
 	{
+		private PillarGrabber _pillarGrabber = null!;
 		private MainFlowCoordinator _mainFlowCoordinator = null!;
+		private MenuPillarErrorViewController _menuPillarErrorViewController = null!;
 		private MenuPillarsSettingsViewController _menuPillarsSettingsViewController = null!;
 
 		[Inject]
-		private void Construct(MainFlowCoordinator mainFlowCoordinator, MenuPillarsSettingsViewController menuPillarsSettingsViewController)
+		private void Construct(PillarGrabber pillarGrabber, MainFlowCoordinator mainFlowCoordinator, MenuPillarErrorViewController menuPillarErrorViewController, MenuPillarsSettingsViewController menuPillarsSettingsViewController)
 		{
+			_pillarGrabber = pillarGrabber;
 			_mainFlowCoordinator = mainFlowCoordinator;
+			_menuPillarErrorViewController = menuPillarErrorViewController;
 			_menuPillarsSettingsViewController = menuPillarsSettingsViewController;
 		}
 		
@@ -21,13 +26,17 @@ namespace MenuPillars.UI.FlowCoordinator
 		{
 			SetTitle(nameof(MenuPillars));
 			showBackButton = true;
-			
-			ProvideInitialViewControllers(_menuPillarsSettingsViewController);
+
+			if (_pillarGrabber.completed)
+			{
+				ProvideInitialViewControllers(_menuPillarsSettingsViewController);	
+			}
+			else
+			{
+				ProvideInitialViewControllers(_menuPillarErrorViewController);
+			}
 		}
 		
-		protected override void BackButtonWasPressed(ViewController topViewController)
-		{
-			_mainFlowCoordinator.DismissFlowCoordinator(this);
-		}
+		protected override void BackButtonWasPressed(ViewController topViewController) => _mainFlowCoordinator.DismissFlowCoordinator(this);
 	}
 }
