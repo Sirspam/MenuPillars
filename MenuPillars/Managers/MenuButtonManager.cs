@@ -21,7 +21,13 @@ namespace MenuPillars.Managers
 
 		public void Initialize() => MenuButtons.instance.RegisterButton(_menuButton);
 
-		public void Dispose() => MenuButtons.instance.UnregisterButton(_menuButton);
+		public void Dispose()
+		{
+			if (MenuButtons.IsSingletonAvailable)
+			{
+				MenuButtons.instance.UnregisterButton(_menuButton);
+			}
+		}
 
 		private void MenuButtonClicked() => _mainFlowCoordinator.PresentFlowCoordinator(_menuPillarsFlowCoordinator);
 	}
