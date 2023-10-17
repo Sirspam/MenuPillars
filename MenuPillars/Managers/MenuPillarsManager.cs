@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MenuPillars.Configuration;
 using MenuPillars.Utils;
+using SiraUtil.Logging;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -127,7 +128,8 @@ namespace MenuPillars.Managers
 			
 			if (_pluginConfig.RainbowLights)
 			{
-				TweenToPillarLightColor(Color.red, callback: () => ToggleRainbowColors(true));
+				Color.RGBToHSV(CurrentColor, out var h, out _, out _);
+				TweenToPillarLightColor(Color.HSVToRGB(h, 1f, 1f), callback: () => ToggleRainbowColors(true));
 			}
 			else
 			{
@@ -137,6 +139,7 @@ namespace MenuPillars.Managers
 
 		public void TweenToPillarLightColor(Color newColor, float duration = 0.5f,  Action? callback = null)
 		{
+			_rainbowTween?.Kill();
 			_colourTween?.Kill();
 			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, duration, EaseType.Linear);
 			if (callback is not null)
@@ -182,9 +185,23 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
+			Color.RGBToHSV(CurrentColor, out var hue, out _, out _);
+			// Society if Tween.progress had a setter
+			_rainbowTween = new FloatTween(hue, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration * (1 - hue), EaseType.Linear)
 			{
-				loop = true
+				onCompleted = () =>
+				{
+					if (_rainbowTween is null || _rainbowTween.isKilled)
+					{
+						return;
+					}
+					
+					_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
+					{
+						loop = true
+					};
+					_timeTweeningManager.AddTween(_rainbowTween, this);
+				}
 			};
 			_timeTweeningManager.AddTween(_rainbowTween, this);
 		}
