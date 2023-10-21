@@ -56,10 +56,10 @@ namespace MenuPillars.Managers
 				b += pixel.b;
 			}
 
-			var averageColour = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
-			Color.RGBToHSV(averageColour, out var h, out var s, out _);
-			averageColour = Color.HSVToRGB(h, s, 1f);
-			_menuPillarsManager.TweenToPillarLightColor(averageColour.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
+			var averageColor = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
+			Color.RGBToHSV(averageColor, out var h, out var s, out _);
+			averageColor = Color.HSVToRGB(h, s, 1f);
+			_menuPillarsManager.TweenToPillarLightColor(averageColor.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
 		}
 
 		private Rect InvertImageAtlas(Rect rect)
