@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MenuPillars.Configuration;
 using MenuPillars.Utils;
+using ModestTree;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -23,7 +24,9 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
 
-		public Color CurrentColor
+        private List<TubeBloomPrePassLight> Lights => _pillarLights ??= [.. _menuPillars!.GetComponentsInChildren<TubeBloomPrePassLight>()];
+
+        public Color CurrentColor
 		{
 			get => _currentColor;
 			set
@@ -60,7 +63,7 @@ namespace MenuPillars.Managers
 		{
 			if (_needColourUpdate && _instantiatedPillars)
 			{
-				foreach (var light in GetLights())
+				foreach (var light in Lights)
 				{
 					light.color = CurrentColor;
 				}
@@ -70,47 +73,6 @@ namespace MenuPillars.Managers
 		}
 		
 		public void Dispose() => _pillarGrabber.CompletedEvent -= InstantiatePillars;
-
-		private void InstantiatePillars()
-		{
-			_pillarGrabber.CompletedEvent -= InstantiatePillars;
-			
-			_menuPillars = new GameObject
-			{
-				name = "MenuPillars"
-			};
-			_menuPillars.transform.SetParent(GameObject.Find("DefaultMenuEnvironment").transform);
-
-			_pillarFrontLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
-			_pillarFrontLeft!.name = "PillarFrontLeft";
-			_pillarFrontRight = Object.Instantiate(PillarGrabber.TemplatePillarRight, new Vector3(30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
-			_pillarFrontRight!.name = "PillarFrontRight";
-			_pillarBackLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-20f, 12f, -40f), Quaternion.Euler(new Vector3(45f, 270f)), _menuPillars.transform);
-			_pillarBackLeft!.name = "PillarBackLeft";
-			_pillarBackRight = Object.Instantiate(PillarGrabber.TemplatePillarRight, new Vector3(20f, 12f, -40f), Quaternion.Euler(new Vector3(45f, 90f)), _menuPillars.transform);
-			_pillarBackRight!.name = "PillarBackRight";
-			CurrentColor = _pluginConfig.PillarLightsColor;
-			_instantiatedPillars = true;
-
-			ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
-			SetPillarLightBrightness(_pluginConfig.LightsBrightness);
-		}
-
-		private List<TubeBloomPrePassLight> GetLights()
-		{
-			if (!_instantiatedPillars)
-			{
-				InstantiatePillars();
-			}
-			
-			if (_pillarLights is null)
-			{
-				_pillarLights = new List<TubeBloomPrePassLight>();
-				_pillarLights.AddRange(_menuPillars!.GetComponentsInChildren<TubeBloomPrePassLight>());
-			}
-
-			return _pillarLights;
-		}
 
 		public void TweenToUserColors()
 		{
@@ -153,40 +115,58 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			foreach (var light in GetLights())
+			foreach (var light in Lights)
 			{
 				light.bloomFogIntensityMultiplier = brightness;
 			}
 		}
 
-		public void ToggleRainbowColors(bool toggle) => ToggleRainbowColors(toggle, _pluginConfig.RainbowLoopSpeed);
+        public void ToggleRainbowColors(bool toggle)
+        {
+            if (!_instantiatedPillars)
+            {
+                return;
+            }
 
-		public void ToggleRainbowColors(bool toggle, float duration)
-		{
-			if (!_instantiatedPillars)
-			{
-				return;
-			}
-			
-			_rainbowTween?.Kill();
-			
-			if (!toggle)
-			{
-				if (!_pluginConfig.EnableLights)
-				{
-					CurrentColor = Color.clear;
-					return;
-				}
-				
-				CurrentColor = _pluginConfig.PillarLightsColor;
-				return;
-			}
-			
-			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
-			{
-				loop = true
-			};
-			_timeTweeningManager.AddTween(_rainbowTween, this);
-		}
-	}
+            _rainbowTween?.Kill();
+
+            CurrentColor = _pluginConfig.EnableLights
+                ? _pluginConfig.PillarLightsColor
+                : Color.clear;
+
+            if (toggle)
+            {
+                _rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), _pluginConfig.RainbowLoopSpeed, EaseType.Linear)
+                {
+                    loop = true
+                };
+                _timeTweeningManager.AddTween(_rainbowTween, this);
+            }
+        }
+
+        private void InstantiatePillars()
+        {
+            _pillarGrabber.CompletedEvent -= InstantiatePillars;
+
+            _menuPillars = new GameObject
+            {
+                name = "MenuPillars"
+            };
+            _menuPillars.transform.SetParent(GameObject.Find("DefaultMenuEnvironment").transform);
+
+            _pillarFrontLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
+            _pillarFrontLeft!.name = "PillarFrontLeft";
+            _pillarFrontRight = Object.Instantiate(PillarGrabber.TemplatePillarRight, new Vector3(30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
+            _pillarFrontRight!.name = "PillarFrontRight";
+            _pillarBackLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-20f, 12f, -40f), Quaternion.Euler(new Vector3(45f, 270f)), _menuPillars.transform);
+            _pillarBackLeft!.name = "PillarBackLeft";
+            _pillarBackRight = Object.Instantiate(PillarGrabber.TemplatePillarRight, new Vector3(20f, 12f, -40f), Quaternion.Euler(new Vector3(45f, 90f)), _menuPillars.transform);
+            _pillarBackRight!.name = "PillarBackRight";
+            CurrentColor = _pluginConfig.PillarLightsColor;
+            _instantiatedPillars = true;
+
+            ToggleRainbowColors(_pluginConfig.EnableLights && _pluginConfig.RainbowLights);
+            SetPillarLightBrightness(_pluginConfig.LightsBrightness);
+        }
+    }
 }
