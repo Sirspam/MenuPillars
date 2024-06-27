@@ -1,10 +1,10 @@
 ﻿using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
+using IPA.Logging;
 using MenuPillars.Configuration;
 using MenuPillars.Installers;
 using SiraUtil.Zenject;
-using IPALogger = IPA.Logging.Logger;
 
 namespace MenuPillars
 {
@@ -12,7 +12,7 @@ namespace MenuPillars
 	public class Plugin
 	{
 		[Init]
-		public void Init(Config config, IPALogger logger, Zenjector zenjector)
+		public void Init(Config config, Logger logger, Zenjector zenjector)
 		{
 			zenjector.UseSiraSync();
 			zenjector.UseLogger(logger);
