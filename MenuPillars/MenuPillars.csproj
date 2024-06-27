@@ -141,9 +141,5 @@
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="UI\Views\*.bsml" />
-    <EmbeddedResource Include="Resources\cat-explode.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>
