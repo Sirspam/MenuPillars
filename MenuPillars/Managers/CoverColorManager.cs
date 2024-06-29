@@ -100,7 +100,7 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			Task.Run(() => GetAverageCoverColorAsync(previewBeatmapLevel));
+			UnityMainThreadTaskScheduler.Factory.StartNew(() => GetAverageCoverColorAsync(previewBeatmapLevel));
 		}
 
 		public void Initialize()
