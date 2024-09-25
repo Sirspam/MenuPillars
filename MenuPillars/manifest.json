@@ -3,7 +3,7 @@
   "id": "MenuPillars",
   "name": "MenuPillars",
   "author": "Sirspam",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Beat Saber mod that brings back the pillars from the 1.13.2 menu environment and adds customisable lights to them",
   "gameVersion": "1.37.5",
   "dependsOn": {
