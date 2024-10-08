@@ -23,7 +23,7 @@ namespace MenuPillars.Managers
 
 		private async Task GetAverageCoverColorAsync(BeatmapLevel previewBeatmapLevel)
 		{
-			var sprite = await previewBeatmapLevel.previewMediaData.GetCoverSpriteAsync(CancellationToken.None);
+			var sprite = await previewBeatmapLevel.previewMediaData.GetCoverSpriteAsync();
 
 			Color[] pixels = {};
 			try
