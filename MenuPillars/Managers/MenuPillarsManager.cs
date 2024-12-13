@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using MenuPillars.Configuration;
 using MenuPillars.Utils;
-using ModestTree;
+using SiraUtil.Logging;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -23,6 +23,7 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackLeft;
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
+		private Transform? _menuEnvironmentTransform;
 
         private List<TubeBloomPrePassLight> Lights => _pillarLights ??= [.. _menuPillars!.GetComponentsInChildren<TubeBloomPrePassLight>()];
 
@@ -50,6 +51,20 @@ namespace MenuPillars.Managers
 
 		public void Initialize()
 		{
+			if (_menuEnvironmentTransform == null)
+			{
+				var menuEnvironmentManager = GameObject.Find("Wrapper/MenuEnvironmentManager").transform;
+				for (int i = 0; i < menuEnvironmentManager.childCount; i++)
+				{
+					var child = menuEnvironmentManager.GetChild(i);
+					if (child.gameObject.activeInHierarchy && child.name.Contains("MenuEnvironment"))
+					{
+						_menuEnvironmentTransform = child;
+						break;
+					}
+				}
+			}
+			
 			if (_pillarGrabber.completed)
 			{
 				InstantiatePillars();
@@ -148,11 +163,16 @@ namespace MenuPillars.Managers
         {
             _pillarGrabber.CompletedEvent -= InstantiatePillars;
 
+            if (_menuEnvironmentTransform == null)
+            {
+	            return;
+            }
+            
             _menuPillars = new GameObject
             {
                 name = "MenuPillars"
             };
-            _menuPillars.transform.SetParent(GameObject.Find("DefaultMenuEnvironment").transform);
+            _menuPillars.transform.SetParent(_menuEnvironmentTransform);
 
             _pillarFrontLeft = Object.Instantiate(PillarGrabber.TemplatePillarLeft, new Vector3(-30f, 15f, 20f), Quaternion.Euler(new Vector3(45f, 0f)), _menuPillars.transform);
             _pillarFrontLeft!.name = "PillarFrontLeft";
