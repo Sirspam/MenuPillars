@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <!-- Change this path if necessary. Make sure it ends with a backslash. -->
-    <BeatSaberDir>H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.37.5</BeatSaberDir>
-    <ReferencePath>H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.37.5\Beat Saber_Data\Managed;H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.37.5\Libs;H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.37.5\Plugins</ReferencePath>
+    <BeatSaberDir>H:/SteamLibrary/steamapps/common/Beat Saber Manager/BSManager/BSInstances/1.40.0_T</BeatSaberDir>
+    <ReferencePath>H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.38.0\Beat Saber_Data\Managed;H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.38.0\Libs;H:\SteamLibrary\steamapps\common\Beat Saber Manager\BSManager\BSInstances\1.38.0\Plugins</ReferencePath>
   </PropertyGroup>
 </Project>
