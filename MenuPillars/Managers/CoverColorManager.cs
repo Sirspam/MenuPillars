@@ -21,7 +21,7 @@ namespace MenuPillars.Managers
 			_levelCollectionViewController = levelCollectionViewController;
 		}
 
-		private async Task GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
+		private async Task<Color> GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
 		{
 			var sprite = await previewBeatmapLevel.GetCoverImageAsync(CancellationToken.None);
 
@@ -58,8 +58,7 @@ namespace MenuPillars.Managers
 
 			var averageColor = new Color(r / pixels.Length, g / pixels.Length, b / pixels.Length);
 			Color.RGBToHSV(averageColor, out var h, out var s, out _);
-			averageColor = Color.HSVToRGB(h, s, 1f);
-			_menuPillarsManager.TweenToPillarLightColor(averageColor.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
+			return Color.HSVToRGB(h, s, 1f);
 		}
 
 		private Rect InvertImageAtlas(Rect rect)
@@ -93,14 +92,15 @@ namespace MenuPillars.Managers
 			_menuPillarsManager.TweenToUserColors();
 		}
 
-		private void LevelCollectionViewControllerOnDidSelectLevelEvent(LevelCollectionViewController viewController, IPreviewBeatmapLevel previewBeatmapLevel)
+		private async void LevelCollectionViewControllerOnDidSelectLevelEvent(LevelCollectionViewController viewController, IPreviewBeatmapLevel previewBeatmapLevel)
 		{
 			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor)
 			{
 				return;
 			}
-			
-			Task.Run(() => GetAverageCoverColorAsync(previewBeatmapLevel));
+
+			var averageColor = await GetAverageCoverColorAsync(previewBeatmapLevel);
+			_menuPillarsManager.TweenToPillarLightColor(averageColor.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
 		}
 
 		public void Initialize()

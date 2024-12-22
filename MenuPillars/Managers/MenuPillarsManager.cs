@@ -24,6 +24,8 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackLeft;
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
+		
+		public event Action<Color>? CurrentColorChanged; 
 
 		public Color CurrentColor
 		{
@@ -32,6 +34,7 @@ namespace MenuPillars.Managers
 			{
 				_currentColor = value;
 				_needColorUpdate = true;
+				CurrentColorChanged?.Invoke(CurrentColor);
 			}
 			
 		}
@@ -116,14 +119,8 @@ namespace MenuPillars.Managers
 
 		public void TweenToUserColors()
 		{
-			if (_colorTween is not null && _colorTween.isActive)
+			if (_colorTween is not null && _colorTween.isActive || _rainbowTween is not null && _rainbowTween.isActive)
 			{
-				return;
-			}
-			
-			if (_rainbowTween is not null && _rainbowTween.isActive)
-			{
-				_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.2f, EaseType.Linear), this);
 				return;
 			}
 			
@@ -171,27 +168,29 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			_floatTween?.Kill();
-			_rainbowTween?.Kill();
+			_timeTweeningManager.KillAllTweens(this);
 			
 			if (!toggle)
 			{
 				if (!_pluginConfig.EnableLights)
 				{
-					CurrentColor = Color.clear;
+					TweenToPillarLightColor(Color.clear);
 					return;
 				}
 				
-				CurrentColor = _pluginConfig.PillarLightsColor;
+				TweenToPillarLightColor(_pluginConfig.PillarLightsColor);
 				return;
 			}
+			
+			// Tweens the alpha to max
+			_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.5f, EaseType.Linear), this);
 			
 			Color.RGBToHSV(CurrentColor, out var startHue, out var startSat, out var startVal);
 			// Tweens the color's saturation and value up to 1f while the rainbow tween is going, makes the transition from a custom oolor to the rainbow loop seamless
 			_floatTween = new FloatTween(Mathf.Min(startSat, startVal), 1f, updateVal =>
 			{
 				Color.RGBToHSV(CurrentColor, out var hue, out var sat, out var val);
-
+				
 				if (updateVal > sat)
 				{
 					sat = updateVal;
@@ -203,11 +202,11 @@ namespace MenuPillars.Managers
 				}
 				
 				CurrentColor = Color.HSVToRGB(hue, sat, val).ColorWithAlpha(CurrentColor.a);
-			}, 1.5f, EaseType.Linear);
+			}, 0.5f, EaseType.Linear);
 			_timeTweeningManager.AddTween(_floatTween, this);
-
-			// Society if Tween.progress had a setter
-			// This first tweens the current color's hue up to 1f then starts the rainbow tween loop.
+			
+			
+			// This first tweens the current color's hue up to 1f then starts a second tween for the rainbow loop.
 			_rainbowTween = new FloatTween(startHue, 1f, updateVal =>
 			{
 				Color.RGBToHSV(CurrentColor, out _, out var sat, out var val);

@@ -174,6 +174,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
+			// TODO: Revert color if cancelled
+			
 			if (_pluginConfig.PillarLightsColor == value)
 			{
 				return;

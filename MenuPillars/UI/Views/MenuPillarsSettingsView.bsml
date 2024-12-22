@@ -8,7 +8,7 @@
         <color-setting text="Lights Color" value="lights-color" interactable="~enable-lights" on-change="lights-color-changed" bind-value="true" apply-on-change="true"/>
         <slider-setting id="slider-brightness" text="Lights Brightness" value="lights-brightness" integer-only="false" increment="0.25" min="0.50" max="~brightness-cap" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <button active="~brightness-cap-raised" text="Reset Brightness Cap" on-click="lower-brightness-cap-clicked" min-width="40" pref-height="7"/>
-        <checkbox-setting text="Use Cover Color" value="use-cover-color" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
+        <checkbox-setting text="Use Cover Color" value="use-cover-color" interactable="~enable-lights" bind-value="true" apply-on-change="true" hover-hint="This will override Rainbow Colors when a song's preview is playing"/>
         <checkbox-setting text="Visualize Audio" value="visualize-audio" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <checkbox-setting text="Rainbow Colors" value="rainbow-lights" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
         <slider-setting text="Rainbow Loop Speed" value="rainbow-loop-speed" integer-only="false" increment="0.25" min="1" max="15" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>

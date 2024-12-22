@@ -9,7 +9,7 @@ namespace MenuPillars.Managers
 {
 	internal sealed class AudioVisualizerManager : IInitializable, IDisposable, ITickable
 	{
-		private const int SampleNumber = 1024;
+		private const int SampleNumber = 512;
 
 		private AudioSource? _currentAudioSource;
 		private float _peakAmplitude;
@@ -62,7 +62,14 @@ namespace MenuPillars.Managers
 			
 			if (_currentAudioSource is not null)
 			{
-				_menuPillarsManager.TweenToUserColors();
+				if (_pluginConfig.RainbowLights)
+				{
+					_menuPillarsManager.ToggleRainbowColors(true);
+				}
+				else
+				{
+					_menuPillarsManager.TweenToPillarLightColor(_menuPillarsManager.CurrentColor.ColorWithAlpha(1f));	
+				}
 			}
 			
 			_currentAudioSource = null;

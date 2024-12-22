@@ -10,7 +10,7 @@ namespace MenuPillars.Configuration
 	{
 		public virtual bool EnableLights { get; set; } = true;
 		public virtual Color PillarLightsColor { get; set; } = Color.cyan;
-		public virtual float LightsBrightness { get; set; } = 0.75f;
+		public virtual float LightsBrightness { get; set; } = 1f;
 		public virtual bool BrightnessCapRaised { get; set; } = false;
 		public virtual bool UseCoverColor { get; set; } = false;
 		public virtual bool VisualizeAudio { get; set; } = false;
