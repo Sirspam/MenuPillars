@@ -56,8 +56,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-			_colorSetting.modalColorPicker.cancelEvent += LightsColorCancelled;
-			_colorSetting.modalColorPicker.doneEvent += LightsColorDone;
+			_colorSetting.ModalColorPicker.CancelEvent += LightsColorCancelled;
+			_colorSetting.ModalColorPicker.DoneEvent += LightsColorDone;
 			
 			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
@@ -248,8 +248,8 @@ namespace MenuPillars.UI.ViewControllers
 		
 		public void Dispose()
 		{
-			_colorSetting.modalColorPicker.cancelEvent -= LightsColorCancelled;
-			_colorSetting.modalColorPicker.doneEvent -= LightsColorDone;
+			_colorSetting.ModalColorPicker.CancelEvent -= LightsColorCancelled;
+			_colorSetting.ModalColorPicker.DoneEvent -= LightsColorDone;
 			
 			_brightnessSliderIncButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
