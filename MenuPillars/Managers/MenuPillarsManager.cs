@@ -233,5 +233,7 @@ namespace MenuPillars.Managers
 			};
 			_timeTweeningManager.AddTween(_rainbowTween, this);
 		}
+		
+		public void KillAllTweens() => _timeTweeningManager.KillAllTweens(this);
 	}
 }
