@@ -8,8 +8,8 @@ namespace MenuPillars.AffinityPatches
 {
 	internal sealed class SongPreviewPlayerPatch : IAffinity
 	{
-		public static event Action<AudioSource>? DefaultAudioSourceStarted;
-		public static event Action<AudioSource>? SongPreviewAudioSourceStarted;
+		internal static event Action<AudioSource>? DefaultAudioSourceStarted;
+		internal static event Action<AudioSource>? SongPreviewAudioSourceStarted;
 
 		[AffinityPostfix]
 		[AffinityPatch(typeof(SongPreviewPlayer), nameof(SongPreviewPlayer.CrossfadeTo), argumentTypes: new[] { typeof(AudioClip), typeof(float), typeof(float), typeof(float), typeof(bool), typeof(Action) })]

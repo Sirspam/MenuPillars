@@ -28,6 +28,8 @@ namespace MenuPillars.UI.ViewControllers
 		private readonly CurvedTextMeshPro _updateText = null!;
 		[UIComponent("version-text")] 
 		private readonly CurvedTextMeshPro _versionText = null!;
+		[UIComponent("color-setting")]
+		private readonly ColorSetting _colorSetting = null!;
 		[UIComponent("slider-brightness")]
 		private readonly SliderSetting _sliderBrightness = null!;
 
@@ -51,6 +53,26 @@ namespace MenuPillars.UI.ViewControllers
 			_gitHubPageModalController = gitHubPageModalController;
 		}
 
+		[UIAction("#post-parse")]
+		private async void PostParse()
+		{
+			_colorSetting.modalColorPicker.cancelEvent += LightsColorCancelled;
+			_colorSetting.modalColorPicker.doneEvent += LightsColorDone;
+			
+			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
+			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
+			
+			var gitVersion = await _siraSyncService.LatestVersion();
+			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
+			{
+				_siraLog.Info($"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!");
+				_updateText.text = $"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!";
+				_updateText.alpha = 0f;
+				UpdateAvailable = true;
+				_timeTweeningManager.AddTween(new FloatTween(0f, 1f, val => _updateText.alpha = val, 0.4f, EaseType.InCubic), this);
+			}
+		}
+		
 		[UIValue("update-available")]
 		private bool UpdateAvailable
 		{
@@ -154,23 +176,6 @@ namespace MenuPillars.UI.ViewControllers
 		[UIValue("version-text-value")]
 		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
-		[UIAction("#post-parse")]
-		private async void PostParse()
-		{
-			_brightnessSliderIncButton = _sliderBrightness.incButton;
-			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
-			
-			var gitVersion = await _siraSyncService.LatestVersion();
-			if (gitVersion is not null && gitVersion > _pluginMetadata.HVersion)
-			{
-				_siraLog.Info($"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!");
-				_updateText.text = $"{nameof(MenuPillars)} v{gitVersion} is available on GitHub!";
-				_updateText.alpha = 0f;
-				UpdateAvailable = true;
-				_timeTweeningManager.AddTween(new FloatTween(0f, 1f, val => _updateText.alpha = val, 0.4f, EaseType.InCubic), this);
-			}
-		}
-
 		[UIAction("lights-color-changed")]
 		private void LightsColorChanged(Color value)
 		{
@@ -182,17 +187,15 @@ namespace MenuPillars.UI.ViewControllers
 			if (RainbowLights)
 			{
 				RainbowLights = false;
+				_menuPillarsManager.KillAllTweens();
 			}
 
 			_menuPillarsManager.CurrentColor = value;
 		}
 
 		[UIAction("lower-brightness-cap-clicked")]
-		private void LowerBrightnessCapClicked()
-		{
-			ChangeBrightnessCap(false);
-		}
-		
+		private void LowerBrightnessCapClicked() => ChangeBrightnessCap(false);
+
 		[UIAction("version-text-clicked")]
 		private void VersionTextClicked()
 		{
@@ -204,6 +207,10 @@ namespace MenuPillars.UI.ViewControllers
 			_gitHubPageModalController.ShowModal(_versionText.transform, _pluginMetadata.Name,
 				_pluginMetadata.PluginHomeLink!.ToString());
 		}
+		
+		private void LightsColorCancelled() => _menuPillarsManager.CurrentColor = _pluginConfig.PillarLightsColor;
+		
+		private void LightsColorDone(Color value) => _pluginConfig.PillarLightsColor = value;
 
 		private void LightBrightnessChanged()
 		{
@@ -241,6 +248,9 @@ namespace MenuPillars.UI.ViewControllers
 		
 		public void Dispose()
 		{
+			_colorSetting.modalColorPicker.cancelEvent -= LightsColorCancelled;
+			_colorSetting.modalColorPicker.doneEvent -= LightsColorDone;
+			
 			_brightnessSliderIncButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
 	}
