@@ -21,9 +21,9 @@ namespace MenuPillars.Managers
 			_levelCollectionViewController = levelCollectionViewController;
 		}
 
-		private async Task<Color> GetAverageCoverColorAsync(IPreviewBeatmapLevel previewBeatmapLevel)
+		private async Task<Color> GetAverageCoverColorAsync(BeatmapLevel beatmapLevel)
 		{
-			var sprite = await previewBeatmapLevel.GetCoverImageAsync(CancellationToken.None);
+			var sprite = await beatmapLevel.previewMediaData.GetCoverSpriteAsync();
 
 			Color[] pixels = {};
 			try
@@ -34,7 +34,7 @@ namespace MenuPillars.Managers
 			{
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					if (previewBeatmapLevel is not CustomPreviewBeatmapLevel)
+					if (beatmapLevel.hasPrecalculatedData)
 					{
 						pixels = GetUnreadableTexture(sprite.texture, InvertImageAtlas(sprite.textureRect)).GetPixels();
 					}
@@ -92,14 +92,14 @@ namespace MenuPillars.Managers
 			_menuPillarsManager.TweenToUserColors();
 		}
 
-		private async void LevelCollectionViewControllerOnDidSelectLevelEvent(LevelCollectionViewController viewController, IPreviewBeatmapLevel previewBeatmapLevel)
+		private async void LevelCollectionViewControllerOnDidSelectLevelEvent(LevelCollectionViewController viewController, BeatmapLevel beatmapLevel)
 		{
 			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor)
 			{
 				return;
 			}
 
-			var averageColor = await GetAverageCoverColorAsync(previewBeatmapLevel);
+			var averageColor = await GetAverageCoverColorAsync(beatmapLevel);
 			_menuPillarsManager.TweenToPillarLightColor(averageColor.ColorWithAlpha(_menuPillarsManager.CurrentColor.a), 0.2f);
 		}
 

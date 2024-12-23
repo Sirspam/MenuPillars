@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
 namespace MenuPillars.Utils
@@ -14,6 +17,8 @@ namespace MenuPillars.Utils
 		public static GameObject? TemplatePillarRight;
 
 		public Action? CompletedEvent;
+
+		private SceneInstance sceneInstance;
 
 		public void Start()
 		{
@@ -30,28 +35,24 @@ namespace MenuPillars.Utils
 			var sceneIsLoaded = false;
 			try
 			{
-				var loadScene = SceneManager.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
-				yield return new WaitUntil(() => loadScene.isDone);
-
+				var loadScene = Addressables.LoadSceneAsync("BigMirrorEnvironment", LoadSceneMode.Additive);
+				yield return new WaitUntil(() => loadScene.IsDone);
 				sceneIsLoaded = true;
-				GameObject[] gameObjects = { };
-				yield return new WaitUntil(() => (gameObjects = SceneManager.GetSceneByName("BigMirrorEnvironment").GetRootGameObjects()) != null);
-				foreach (var go in gameObjects)
-				{
-					if (go.name == "Environment")
-					{
-						TemplatePillarLeft = go.transform.Find("NearBuildingLeft").gameObject;
-						TemplatePillarRight = go.transform.Find("NearBuildingRight").gameObject;
-						
-						break;
-					}	
-				}
+				sceneInstance = loadScene.Result;
+				
+				var environmentObject = sceneInstance.Scene
+					.GetRootGameObjects()
+					.First(go => go.name == "Environment");
+				TemplatePillarLeft = environmentObject.transform.Find("NearBuildingLeft").gameObject;
+				TemplatePillarRight = environmentObject.transform.Find("NearBuildingRight").gameObject;
+				_ = TemplatePillarLeft.transform.Find("Mesh").GetComponent<MeshRenderer>().material;
+				_ = TemplatePillarRight.transform.Find("Mesh").GetComponent<MeshRenderer>().material;
 			}
 			finally
 			{
 				if (sceneIsLoaded)
 				{
-					SceneManager.UnloadSceneAsync("BigMirrorEnvironment");
+					Addressables.UnloadSceneAsync(sceneInstance);
 				}
 
 				if (TemplatePillarLeft != null && TemplatePillarRight != null)

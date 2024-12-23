@@ -3,6 +3,5 @@
         <text text="Uh oh, looks like something has gone wrong!" font-size="6.2" align="Center"/>
         <text text="Try restarting Beat Saber." align="Center"/>
         <text text="If the issue persists, ask for help in BSMG or open a GitHub issue." align="Center"/>
-        <img src="MenuPillars.Resources.cat-explode.gif" preserve-aspect="true"/>
     </vertical>
 </bg>

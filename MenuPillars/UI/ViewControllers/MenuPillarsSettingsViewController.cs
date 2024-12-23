@@ -56,8 +56,8 @@ namespace MenuPillars.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private async void PostParse()
 		{
-			_colorSetting.modalColorPicker.cancelEvent += LightsColorCancelled;
-			_colorSetting.modalColorPicker.doneEvent += LightsColorDone;
+			_colorSetting.ModalColorPicker.CancelEvent += LightsColorCancelled;
+			_colorSetting.ModalColorPicker.DoneEvent += LightsColorDone;
 			
 			_brightnessSliderIncButton = _sliderBrightness.GetField<Button, GenericSliderSetting>("incButton");
 			_brightnessSliderIncButton.onClick.AddListener(LightBrightnessChanged);
@@ -214,7 +214,7 @@ namespace MenuPillars.UI.ViewControllers
 
 		private void LightBrightnessChanged()
 		{
-			if (!BrightnessCapRaised && _sliderBrightness.slider.value.Equals(_sliderBrightness.slider.maxValue))
+			if (!BrightnessCapRaised && _sliderBrightness.Slider.value.Equals(_sliderBrightness.Slider.maxValue))
 			{
 				_brightnessSliderIncButtonPressedCount += 1;
 				if (_brightnessSliderIncButtonPressedCount == 3)
@@ -232,14 +232,14 @@ namespace MenuPillars.UI.ViewControllers
 				case true:
 				{
 					BrightnessCapRaised = true;
-					_sliderBrightness.slider.maxValue = BrightnessCap;
-					_sliderBrightness.slider.value = 10;
+					_sliderBrightness.Slider.maxValue = BrightnessCap;
+					_sliderBrightness.Slider.value = 10;
 					break;
 				}
 				case false:
 				{
 					BrightnessCapRaised = false;
-					_sliderBrightness.slider.maxValue = BrightnessCap;
+					_sliderBrightness.Slider.maxValue = BrightnessCap;
 					LightsBrightness = BrightnessCap;
 					break;
 				}
@@ -248,8 +248,8 @@ namespace MenuPillars.UI.ViewControllers
 		
 		public void Dispose()
 		{
-			_colorSetting.modalColorPicker.cancelEvent -= LightsColorCancelled;
-			_colorSetting.modalColorPicker.doneEvent -= LightsColorDone;
+			_colorSetting.ModalColorPicker.CancelEvent -= LightsColorCancelled;
+			_colorSetting.ModalColorPicker.DoneEvent -= LightsColorDone;
 			
 			_brightnessSliderIncButton!.onClick.RemoveListener(LightBrightnessChanged);
 		}
