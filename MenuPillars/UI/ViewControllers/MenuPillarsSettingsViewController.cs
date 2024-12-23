@@ -152,7 +152,7 @@ namespace MenuPillars.UI.ViewControllers
 		}
 		
 		[UIValue("version-text-value")]
-		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author} (Forked by qqrz997)";
+		private string VersionText => $"{_pluginMetadata.Name} v{_pluginMetadata.HVersion} by {_pluginMetadata.Author}";
 
 		[UIAction("#post-parse")]
 		private async void PostParse()

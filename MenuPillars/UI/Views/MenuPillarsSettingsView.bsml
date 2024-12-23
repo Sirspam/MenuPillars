@@ -14,7 +14,7 @@
         <slider-setting text="Rainbow Loop Speed" value="rainbow-loop-speed" integer-only="false" increment="0.25" min="1" max="15" show-buttons="true" interactable="~enable-lights" bind-value="true" apply-on-change="true"/>
     </vertical>
 
-  <horizontal anchor-pos-x="15" anchor-pos-y="-35" vertical-fit="PreferredSize" horizontal-fit="PreferredSize">
+  <horizontal anchor-pos-x="30" anchor-pos-y="-35" vertical-fit="PreferredSize" horizontal-fit="PreferredSize">
         <clickable-text id="version-text" text="~version-text-value" on-click="version-text-clicked" align="Right" font-size="4" default-color="orange" highlight-color="yellow"/>
     </horizontal>
 </bg>
