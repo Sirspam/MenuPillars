@@ -42,12 +42,14 @@ namespace MenuPillars.Managers
 			
 		}
 
+		private readonly SiraLog _siraLog;
 		private readonly PluginConfig _pluginConfig;
 		private readonly PillarGrabber _pillarGrabber;
 		private readonly TimeTweeningManager _timeTweeningManager;
 
-		public MenuPillarsManager(PluginConfig pluginConfig, PillarGrabber pillarGrabber, TimeTweeningManager timeTweeningManager)
+		public MenuPillarsManager(SiraLog siraLog, PluginConfig pluginConfig, PillarGrabber pillarGrabber, TimeTweeningManager timeTweeningManager)
 		{
+			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_pillarGrabber = pillarGrabber;
 			_timeTweeningManager = timeTweeningManager;
@@ -55,17 +57,25 @@ namespace MenuPillars.Managers
 
 		public void Initialize()
 		{
-			if (_menuEnvironmentTransform == null)
+			if (_menuEnvironmentTransform is null)
 			{
+				// MenuEnvironmentManager holds multiple menu environments, this finds the first active one so we can later parent the pillars to it.
+				// May need to return to this if a separate mod swaps the active env after menuPillars is initialized.
 				var menuEnvironmentManager = GameObject.Find("Wrapper/MenuEnvironmentManager").transform;
-				for (int i = 0; i < menuEnvironmentManager.childCount; i++)
+
+				foreach (Transform child in menuEnvironmentManager)
 				{
-					var child = menuEnvironmentManager.GetChild(i);
-					if (child.gameObject.activeInHierarchy && child.name.Contains("MenuEnvironment"))
-					{
-						_menuEnvironmentTransform = child;
-						break;
-					}
+					if (!child.gameObject.activeInHierarchy || !child.name.Contains("MenuEnvironment")) 
+						continue;
+					
+					_menuEnvironmentTransform = child;
+					break;
+				}
+
+				if (_menuEnvironmentTransform is null)
+				{
+					_siraLog.Error("Failed to find active menu environment!");
+					return;
 				}
 			}
 			
@@ -216,7 +226,7 @@ namespace MenuPillars.Managers
 		{
 			_pillarGrabber.CompletedEvent -= InstantiatePillars;
 
-			if (_menuEnvironmentTransform == null)
+			if (_menuEnvironmentTransform is null)
 			{
 				return;
 			}
