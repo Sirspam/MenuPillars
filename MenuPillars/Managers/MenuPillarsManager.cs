@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MenuPillars.Configuration;
 using MenuPillars.Utils;
+using SiraUtil.Logging;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -12,8 +13,9 @@ namespace MenuPillars.Managers
 	internal sealed class MenuPillarsManager : IInitializable, ILateTickable, IDisposable
 	{
 		private Color _currentColor;
-		private bool _needColourUpdate;
-		private ColorTween? _colourTween;
+		private bool _needColorUpdate;
+		private ColorTween? _colorTween;
+		private FloatTween? _floatTween;
 		private GameObject? _menuPillars;
 		private FloatTween? _rainbowTween;
 		private bool _instantiatedPillars;
@@ -22,6 +24,8 @@ namespace MenuPillars.Managers
 		private GameObject? _pillarBackLeft;
 		private GameObject? _pillarBackRight;
 		private List<TubeBloomPrePassLight>? _pillarLights;
+		
+		public event Action<Color>? CurrentColorChanged; 
 
 		public Color CurrentColor
 		{
@@ -29,7 +33,8 @@ namespace MenuPillars.Managers
 			set
 			{
 				_currentColor = value;
-				_needColourUpdate = true;
+				_needColorUpdate = true;
+				CurrentColorChanged?.Invoke(CurrentColor);
 			}
 			
 		}
@@ -58,14 +63,14 @@ namespace MenuPillars.Managers
 
 		public void LateTick()
 		{
-			if (_needColourUpdate && _instantiatedPillars)
+			if (_needColorUpdate && _instantiatedPillars)
 			{
 				foreach (var light in GetLights())
 				{
 					light.color = CurrentColor;
 				}
 
-				_needColourUpdate = false;	
+				_needColorUpdate = false;	
 			}
 		}
 		
@@ -114,20 +119,14 @@ namespace MenuPillars.Managers
 
 		public void TweenToUserColors()
 		{
-			if (_colourTween is not null && _colourTween.isActive)
+			if (_colorTween is not null && _colorTween.isActive || _rainbowTween is not null && _rainbowTween.isActive)
 			{
-				return;
-			}
-			
-			if (_rainbowTween is not null && _rainbowTween.isActive)
-			{
-				_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.2f, EaseType.Linear), this);
 				return;
 			}
 			
 			if (_pluginConfig.RainbowLights)
 			{
-				TweenToPillarLightColor(Color.red, callback: () => ToggleRainbowColors(true));
+				ToggleRainbowColors(true);
 			}
 			else
 			{
@@ -137,13 +136,14 @@ namespace MenuPillars.Managers
 
 		public void TweenToPillarLightColor(Color newColor, float duration = 0.5f,  Action? callback = null)
 		{
-			_colourTween?.Kill();
-			_colourTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, duration, EaseType.Linear);
+			_rainbowTween?.Kill();
+			_colorTween?.Kill();
+			_colorTween = new ColorTween(CurrentColor, newColor, val => CurrentColor = val, duration, EaseType.Linear);
 			if (callback is not null)
 			{
-				_colourTween.onCompleted = callback.Invoke;
+				_colorTween.onCompleted = callback.Invoke;
 			}
-			_timeTweeningManager.AddTween(_colourTween, this);
+			_timeTweeningManager.AddTween(_colorTween, this);
 		}
 
 		public void SetPillarLightBrightness(float brightness)
@@ -168,25 +168,72 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			_rainbowTween?.Kill();
+			_timeTweeningManager.KillAllTweens(this);
 			
 			if (!toggle)
 			{
 				if (!_pluginConfig.EnableLights)
 				{
-					CurrentColor = Color.clear;
+					TweenToPillarLightColor(Color.clear);
 					return;
 				}
 				
-				CurrentColor = _pluginConfig.PillarLightsColor;
+				TweenToPillarLightColor(_pluginConfig.PillarLightsColor);
 				return;
 			}
 			
-			_rainbowTween = new FloatTween(0f, 1f, val => CurrentColor = Color.HSVToRGB(val, 1f, 1f).ColorWithAlpha(CurrentColor.a), duration, EaseType.Linear)
+			// Tweens the alpha to max
+			_timeTweeningManager.AddTween(new FloatTween(CurrentColor.a, 1f, val => CurrentColor = CurrentColor.ColorWithAlpha(val), 0.5f, EaseType.Linear), this);
+			
+			Color.RGBToHSV(CurrentColor, out var startHue, out var startSat, out var startVal);
+			// Tweens the color's saturation and value up to 1f while the rainbow tween is going, makes the transition from a custom oolor to the rainbow loop seamless
+			_floatTween = new FloatTween(Mathf.Min(startSat, startVal), 1f, updateVal =>
 			{
-				loop = true
+				Color.RGBToHSV(CurrentColor, out var hue, out var sat, out var val);
+				
+				if (updateVal > sat)
+				{
+					sat = updateVal;
+				}
+				
+				if (updateVal > val)
+				{
+					val = updateVal;
+				}
+				
+				CurrentColor = Color.HSVToRGB(hue, sat, val).ColorWithAlpha(CurrentColor.a);
+			}, 0.5f, EaseType.Linear);
+			_timeTweeningManager.AddTween(_floatTween, this);
+			
+			
+			// This first tweens the current color's hue up to 1f then starts a second tween for the rainbow loop.
+			_rainbowTween = new FloatTween(startHue, 1f, updateVal =>
+			{
+				Color.RGBToHSV(CurrentColor, out _, out var sat, out var val);
+				CurrentColor = Color.HSVToRGB(updateVal, sat, val).ColorWithAlpha(CurrentColor.a);
+			}, duration * (1 - startHue), EaseType.Linear)
+			{
+				onCompleted = () =>
+				{
+					if (_rainbowTween is null || _rainbowTween.isKilled)
+					{
+						return;
+					}
+					
+					_rainbowTween = new FloatTween(0f, 1f, val =>
+					{
+						Color.RGBToHSV(CurrentColor, out _, out var s, out var v);
+						CurrentColor = Color.HSVToRGB(val, s, v).ColorWithAlpha(CurrentColor.a);
+					}, duration, EaseType.Linear)
+					{
+						loop = true
+					};
+					_timeTweeningManager.AddTween(_rainbowTween, this);
+				}
 			};
 			_timeTweeningManager.AddTween(_rainbowTween, this);
 		}
+		
+		public void KillAllTweens() => _timeTweeningManager.KillAllTweens(this);
 	}
 }

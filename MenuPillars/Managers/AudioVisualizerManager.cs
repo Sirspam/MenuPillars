@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MenuPillars.AffinityPatches;
 using MenuPillars.Configuration;
 using SiraUtil.Logging;
@@ -9,7 +10,8 @@ namespace MenuPillars.Managers
 {
 	internal sealed class AudioVisualizerManager : IInitializable, IDisposable, ITickable
 	{
-		private const int SampleNumber = 1024;
+		private const int SampleNumber = 256;
+		private readonly float[] _samples;
 
 		private AudioSource? _currentAudioSource;
 		private float _peakAmplitude;
@@ -23,9 +25,11 @@ namespace MenuPillars.Managers
 			_pluginConfig = pluginConfig;
 			_menuPillarsManager = menuPillarsManager;
 			_siraLog = siraLog;
+			
+			_samples = new float[SampleNumber];
 		}
 
-		// Unfortunately I am stupid so this looks trash :(
+		// Either I am dumb or real time audio visualization is hard, likely the former
 		public void Tick()
 		{
 			if (!_pluginConfig.VisualizeAudio || !_pluginConfig.EnableLights || _currentAudioSource is null)
@@ -33,24 +37,14 @@ namespace MenuPillars.Managers
 				return;
 			}
 			
-			var samples = new float[SampleNumber];
-			
-			_currentAudioSource.GetOutputData(samples, 0);
+			_currentAudioSource.GetOutputData(_samples, 0);
 
-			var amplitude = 0f;
-			foreach (var sample in samples)
-			{
-				amplitude += Mathf.Abs(sample);
-			}
+			var amplitude = Mathf.Sqrt(_samples.Sum(sample => sample * sample) / SampleNumber);
 			
-			amplitude /= SampleNumber;
-			
-			if (amplitude > _peakAmplitude)
-			{
-				_peakAmplitude = amplitude;
-			}
-			
-			_menuPillarsManager.CurrentColor = _menuPillarsManager.CurrentColor.ColorWithAlpha(Mathf.InverseLerp(0f, _peakAmplitude, amplitude));
+			_peakAmplitude = Mathf.Lerp(_peakAmplitude, Mathf.Max(amplitude, _peakAmplitude), 0.1f);
+
+			var normalizedAmplitude = Mathf.InverseLerp(0f, _peakAmplitude, amplitude);
+			_menuPillarsManager.CurrentColor = _menuPillarsManager.CurrentColor.ColorWithAlpha(normalizedAmplitude);
 		}
 
 		private void SongPreviewPlayerPatchOnDefaultAudioSourceStarted(AudioSource audioSource)
@@ -62,7 +56,14 @@ namespace MenuPillars.Managers
 			
 			if (_currentAudioSource is not null)
 			{
-				_menuPillarsManager.TweenToUserColors();
+				if (_pluginConfig.RainbowLights)
+				{
+					_menuPillarsManager.ToggleRainbowColors(true);
+				}
+				else
+				{
+					_menuPillarsManager.TweenToPillarLightColor(_menuPillarsManager.CurrentColor.ColorWithAlpha(1f));	
+				}
 			}
 			
 			_currentAudioSource = null;
