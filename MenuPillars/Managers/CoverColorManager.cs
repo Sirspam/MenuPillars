@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using IPA.Utilities.Async;
 using MenuPillars.Configuration;
+using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
@@ -10,12 +12,14 @@ namespace MenuPillars.Managers
 {
 	internal sealed class CoverColorManager : IInitializable, IDisposable
 	{
+		private readonly SiraLog _siraLog;
 		private readonly PluginConfig _pluginConfig;
 		private readonly MenuPillarsManager _menuPillarsManager;
 		private readonly LevelCollectionViewController _levelCollectionViewController;
 
-		public CoverColorManager(PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
+		public CoverColorManager(SiraLog siraLog, PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
 		{
+			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_menuPillarsManager = menuPillarsManager;
 			_levelCollectionViewController = levelCollectionViewController;
@@ -25,23 +29,18 @@ namespace MenuPillars.Managers
 		{
 			var sprite = await beatmapLevel.previewMediaData.GetCoverSpriteAsync();
 
-			Color[] pixels = {};
+			Color32[] pixels = [];
 			try
 			{
-				pixels = sprite.texture.GetPixels();
+				pixels = sprite.texture.GetPixels32();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				_siraLog.Debug(ex.Message);
+				
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					if (beatmapLevel.hasPrecalculatedData)
-					{
-						pixels = GetUnreadableTexture(sprite.texture, InvertImageAtlas(sprite.textureRect)).GetPixels();
-					}
-					else
-					{
-						pixels = GetUnreadableTexture(sprite.texture, sprite.textureRect).GetPixels();
-					}
+					pixels = GetUnreadableTexture(sprite.texture, sprite.textureRect).GetPixels32();
 				});
 			}
 
@@ -60,12 +59,6 @@ namespace MenuPillars.Managers
 			Color.RGBToHSV(averageColor, out var h, out var s, out _);
 			return Color.HSVToRGB(h, s, 1f);
 		}
-
-		private Rect InvertImageAtlas(Rect rect)
-		{
-			rect.y = 2048 - rect.y - 160;
-			return rect;
-		}
 		
 		private Texture2D GetUnreadableTexture(Texture2D texture, Rect rect)
 		{
@@ -78,6 +71,11 @@ namespace MenuPillars.Managers
 			readableTexture.Apply();
 			RenderTexture.active = previous;
 			RenderTexture.ReleaseTemporary(tempRenderTexture);
+			
+			/*// Write the texture to disk for debugging purposes
+			byte[] bytes = readableTexture.EncodeToPNG();
+			var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "debug_texture.png");
+			File.WriteAllBytes(path, bytes);*/
 
 			return readableTexture;
 		}
