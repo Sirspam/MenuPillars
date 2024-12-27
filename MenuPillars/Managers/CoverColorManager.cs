@@ -15,13 +15,15 @@ namespace MenuPillars.Managers
 		private readonly SiraLog _siraLog;
 		private readonly PluginConfig _pluginConfig;
 		private readonly MenuPillarsManager _menuPillarsManager;
+		private readonly PracticeViewController _practiceViewController;
 		private readonly LevelCollectionViewController _levelCollectionViewController;
 
-		public CoverColorManager(SiraLog siraLog, PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, LevelCollectionViewController levelCollectionViewController)
+		public CoverColorManager(SiraLog siraLog, PluginConfig pluginConfig, MenuPillarsManager menuPillarsManager, PracticeViewController practiceViewController, LevelCollectionViewController levelCollectionViewController)
 		{
 			_siraLog = siraLog;
 			_pluginConfig = pluginConfig;
 			_menuPillarsManager = menuPillarsManager;
+			_practiceViewController = practiceViewController;
 			_levelCollectionViewController = levelCollectionViewController;
 		}
 
@@ -82,7 +84,7 @@ namespace MenuPillars.Managers
 		
 		private void LevelCollectionViewControllerOnDidDeactivateEvent(bool removedfromhierarchy, bool screensystemdisabling)
 		{
-			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor)
+			if (!_pluginConfig.EnableLights || !_pluginConfig.UseCoverColor || _practiceViewController.enabled)
 			{
 				return;
 			}
